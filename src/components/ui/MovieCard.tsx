@@ -42,17 +42,13 @@ export default function MovieCard({ movie, index = 0, size = "default" }: MovieC
   const targetRoute = movie.media_type === "tv" || movie.name ? `/tv/${movie.id}` : `/movie/${movie.id}`;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.4, delay: index * 0.04, ease: [0.16, 1, 0.3, 1] }}
+    <div
       className={`group relative flex flex-col gap-3 snap-start ${
         size === "large" ? "min-w-[200px] md:min-w-[240px]" : "min-w-[150px] md:min-w-[185px]"
       }`}
     >
       <Link href={targetRoute} className="block">
-        <div className="relative overflow-hidden rounded-xl bg-bg-elevated shadow-card transition-all duration-500 group-hover:shadow-card-hover group-hover:-translate-y-2 aspect-[2/3]">
+        <div className="relative overflow-hidden rounded-xl bg-bg-elevated shadow-card transition-all duration-500 group-hover:shadow-card-hover md:group-hover:-translate-y-2 aspect-[2/3]">
           {/* Gradient border on hover */}
           <div className="absolute inset-0 rounded-xl border border-border/50 group-hover:border-accent/20 transition-colors duration-500 z-20 pointer-events-none" />
 
@@ -61,7 +57,7 @@ export default function MovieCard({ movie, index = 0, size = "default" }: MovieC
               src={img(movie.poster_path, "w500")}
               alt={displayTitle || ""}
               fill
-              className="object-cover transition-transform duration-700 group-hover:scale-110"
+              className="object-cover transition-transform duration-700 md:group-hover:scale-110"
               sizes={size === "large" ? "(max-width: 768px) 50vw, 240px" : "(max-width: 768px) 40vw, 185px"}
             />
           ) : (
@@ -71,8 +67,8 @@ export default function MovieCard({ movie, index = 0, size = "default" }: MovieC
           )}
 
           {/* Hover overlay with actions */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 z-10 flex flex-col justify-end p-3.5 mobile-no-blur">
-            <div className="flex gap-2 transform translate-y-3 group-hover:translate-y-0 transition-transform duration-300 delay-75">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-0 md:group-hover:opacity-100 transition-all duration-300 z-10 flex flex-col justify-end p-3.5 mobile-no-blur">
+            <div className="flex gap-2 transform translate-y-3 md:group-hover:translate-y-0 transition-transform duration-300 delay-75">
               <button
                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWatchlist(movie as any); }}
                 className={`p-2 rounded-lg backdrop-blur-md transition-all ${
@@ -119,6 +115,6 @@ export default function MovieCard({ movie, index = 0, size = "default" }: MovieC
           </span>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }
