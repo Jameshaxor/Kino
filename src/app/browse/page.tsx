@@ -9,23 +9,33 @@ async function getBrowseMovies() {
   const apiKey = process.env.TMDB_API_KEY;
   if (!apiKey) return [];
   
-  // Fetch popular and highly rated movies to build a pristine catalog
+  // Fetch popular and highly rated movies and TV shows to build a pristine hybrid catalog
   const urls = [
-    `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=en-US&sort_by=popularity.desc&page=1`,
-    `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=en-US&sort_by=popularity.desc&page=2`,
-    `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=en-US&sort_by=popularity.desc&page=3`,
-    `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=en-US&sort_by=vote_count.desc&page=1`, // All-time highly rated
+    { url: `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=en-US&sort_by=popularity.desc&page=1`, type: "movie" },
+    { url: `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=en-US&sort_by=popularity.desc&page=2`, type: "movie" },
+    { url: `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&language=en-US&sort_by=popularity.desc&page=1`, type: "tv" },
+    { url: `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&language=en-US&sort_by=popularity.desc&page=2`, type: "tv" },
   ];
 
   try {
-    const responses = await Promise.all(urls.map(url => fetch(url, { next: { revalidate: 3600 } })));
+    const responses = await Promise.all(urls.map(u => fetch(u.url, { next: { revalidate: 3600 } })));
     const data = await Promise.all(responses.map(r => r.json()));
     
-    const allMovies = data.flatMap(d => d.results || []);
+    // Inject media_type based on the origin URL config
+    const allMedia = data.flatMap((d, index) => 
+      (d.results || []).map((item: any) => ({ ...item, media_type: urls[index].type }))
+    );
     
-    // Deduplicate movies by ID
-    const uniqueMovies = Array.from(new Map(allMovies.map(m => [m.id, m])).values());
-    return uniqueMovies;
+    // Deduplicate items by ID + media_type incase TMDB IDs somehow overlap cross-category
+    const uniqueMedia = Array.from(new Map(allMedia.map(m => [`${m.media_type}-${m.id}`, m])).values());
+    
+    // Shuffle the array to intermix movies and tv shows
+    for (let i = uniqueMedia.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [uniqueMedia[i], uniqueMedia[j]] = [uniqueMedia[j], uniqueMedia[i]];
+    }
+
+    return uniqueMedia;
   } catch (error) {
     console.error("Failed to fetch browse catalog:", error);
     return [];

@@ -3,17 +3,20 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, X, Film, ArrowRight, Loader2 } from "lucide-react";
+import { Search, X, Film, Tv, ArrowRight, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { img } from "@/lib/tmdb";
 import { useDebounce } from "@/hooks/useDebounce";
 
 interface SearchResult {
   id: number;
-  title: string;
+  title?: string;
+  name?: string;
   poster_path: string | null;
-  release_date: string;
+  release_date?: string;
+  first_air_date?: string;
   vote_average: number;
+  media_type: "movie" | "tv" | "person";
 }
 
 interface CommandPaletteProps {
@@ -48,10 +51,12 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     const fetchResults = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/tmdb/search/movie?query=${encodeURIComponent(debouncedQuery)}`);
+        const res = await fetch(`/api/tmdb/search/multi?query=${encodeURIComponent(debouncedQuery)}`);
         if (res.ok) {
           const data = await res.json();
-          setResults(data.results?.slice(0, 8) || []);
+          // Filter out people, only keep movies and TV
+          const media = data.results?.filter((r: SearchResult) => r.media_type === "movie" || r.media_type === "tv") || [];
+          setResults(media.slice(0, 8));
         }
       } catch {
         console.error("Search failed");
@@ -83,7 +88,8 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
         e.preventDefault();
         setSelectedIndex((prev) => Math.max(prev - 1, 0));
       } else if (e.key === "Enter" && results[selectedIndex]) {
-        navigateTo(`/movie/${results[selectedIndex].id}`);
+        const result = results[selectedIndex];
+        navigateTo(`/${result.media_type}/${result.id}`);
       }
     };
 
@@ -95,7 +101,6 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -105,7 +110,6 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
             onClick={onClose}
           />
 
-          {/* Panel */}
           <motion.div
             initial={{ opacity: 0, scale: 0.98, y: -10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -114,7 +118,6 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
             className="fixed top-[15%] left-1/2 -translate-x-1/2 z-[101] w-full max-w-xl"
           >
             <div className="mx-4 bg-bg-elevated border border-border rounded-xl shadow-overlay overflow-hidden">
-              {/* Search input */}
               <div className="flex items-center gap-3 px-4 border-b border-border">
                 <Search className="w-4 h-4 text-text-tertiary flex-shrink-0" />
                 <input
@@ -125,7 +128,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                     setQuery(e.target.value);
                     setSelectedIndex(0);
                   }}
-                  placeholder="Search movies..."
+                  placeholder="Search movies, TV shows, anime..."
                   className="flex-1 py-4 bg-transparent text-text-primary placeholder:text-text-tertiary text-sm focus:outline-none"
                 />
                 {loading && <Loader2 className="w-4 h-4 text-text-tertiary animate-spin" />}
@@ -134,52 +137,65 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                 </button>
               </div>
 
-              {/* Results */}
               <div className="max-h-[400px] overflow-y-auto">
                 {results.length > 0 ? (
                   <div className="p-2">
-                    {results.map((movie, i) => (
-                      <button
-                        key={movie.id}
-                        onClick={() => navigateTo(`/movie/${movie.id}`)}
-                        onMouseEnter={() => setSelectedIndex(i)}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
-                          i === selectedIndex ? "bg-bg-surface" : "hover:bg-bg-surface/50"
-                        }`}
-                      >
-                        <div className="w-9 h-13 rounded overflow-hidden bg-bg-surface flex-shrink-0">
-                          {movie.poster_path ? (
-                            <Image
-                              src={img(movie.poster_path, "w92")}
-                              alt=""
-                              width={36}
-                              height={52}
-                              className="object-cover w-full h-full"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <Film className="w-3 h-3 text-text-tertiary" />
+                    {results.map((result, i) => {
+                      const title = result.title || result.name;
+                      const date = result.release_date || result.first_air_date;
+                      const year = date ? new Date(date).getFullYear() : "—";
+                      
+                      return (
+                        <button
+                          key={`${result.media_type}-${result.id}`}
+                          onClick={() => navigateTo(`/${result.media_type}/${result.id}`)}
+                          onMouseEnter={() => setSelectedIndex(i)}
+                          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
+                            i === selectedIndex ? "bg-bg-surface" : "hover:bg-bg-surface/50"
+                          }`}
+                        >
+                          <div className="w-9 h-13 rounded overflow-hidden bg-bg-surface flex-shrink-0 relative">
+                            {result.poster_path ? (
+                              <Image
+                                src={img(result.poster_path, "w92")}
+                                alt={title || ""}
+                                fill
+                                className="object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                {result.media_type === "tv" ? (
+                                  <Tv className="w-3 h-3 text-text-tertiary" />
+                                ) : (
+                                  <Film className="w-3 h-3 text-text-tertiary" />
+                                )}
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm font-medium text-text-primary truncate">{title}</p>
+                              <span className="px-1.5 py-0.5 rounded bg-bg-base/50 border border-border text-[9px] uppercase tracking-wider text-text-secondary">
+                                {result.media_type}
+                              </span>
                             </div>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-text-primary truncate">{movie.title}</p>
-                          <p className="text-xs text-text-tertiary font-mono">
-                            {movie.release_date ? new Date(movie.release_date).getFullYear() : "—"}
-                            {movie.vote_average > 0 && ` · ${movie.vote_average.toFixed(1)}★`}
-                          </p>
-                        </div>
-                        <ArrowRight className="w-3.5 h-3.5 text-text-tertiary opacity-0 group-hover:opacity-100" />
-                      </button>
-                    ))}
+                            <p className="text-xs text-text-tertiary font-mono mt-0.5">
+                              {year}
+                              {result.vote_average > 0 && ` · ${result.vote_average.toFixed(1)}★`}
+                            </p>
+                          </div>
+                          <ArrowRight className="w-3.5 h-3.5 text-text-tertiary opacity-0 group-hover:opacity-100" />
+                        </button>
+                      );
+                    })}
                   </div>
                 ) : query && !loading ? (
                   <div className="p-8 text-center text-text-tertiary text-sm">
-                    No movies found for &ldquo;{query}&rdquo;
+                    No results found for &ldquo;{query}&rdquo;
                   </div>
                 ) : !query ? (
                   <div className="p-6 text-center text-text-tertiary text-sm">
-                    <p>Start typing to search movies</p>
+                    <p>Search the entire KINO catalog</p>
                     <div className="flex items-center justify-center gap-4 mt-3 text-xs">
                       <span className="flex items-center gap-1">
                         <kbd className="px-1.5 py-0.5 rounded bg-bg-surface border border-border font-mono">↑↓</kbd>
@@ -198,16 +214,9 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                 ) : null}
               </div>
 
-              {/* Footer hint */}
               {results.length > 0 && (
                 <div className="px-4 py-2.5 border-t border-border flex justify-between text-xs text-text-tertiary">
                   <span>{results.length} results</span>
-                  <button
-                    onClick={() => navigateTo(`/search?q=${encodeURIComponent(query)}`)}
-                    className="text-accent hover:text-accent-hover transition-colors"
-                  >
-                    View all results →
-                  </button>
                 </div>
               )}
             </div>

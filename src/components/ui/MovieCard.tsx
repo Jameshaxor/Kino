@@ -9,11 +9,14 @@ import { useWatchlist } from "@/context/WatchlistContext";
 
 export interface MovieCardMovie {
   id: number;
-  title: string;
+  title?: string;
+  name?: string;
   poster_path: string | null;
   backdrop_path?: string | null;
   vote_average: number;
   release_date?: string;
+  first_air_date?: string;
+  media_type?: string;
   genre_ids?: number[];
   overview?: string;
   vote_count?: number;
@@ -34,6 +37,10 @@ export default function MovieCard({ movie, index = 0, size = "default" }: MovieC
   const ratingColor =
     movie.vote_average >= 7 ? "text-rating-high" : movie.vote_average >= 5 ? "text-rating-mid" : "text-rating-low";
 
+  const displayTitle = movie.title || movie.name;
+  const displayDate = movie.release_date || movie.first_air_date;
+  const targetRoute = movie.media_type === "tv" || movie.name ? `/tv/${movie.id}` : `/movie/${movie.id}`;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -44,7 +51,7 @@ export default function MovieCard({ movie, index = 0, size = "default" }: MovieC
         size === "large" ? "min-w-[200px] md:min-w-[240px]" : "min-w-[150px] md:min-w-[185px]"
       }`}
     >
-      <Link href={`/movie/${movie.id}`} className="block">
+      <Link href={targetRoute} className="block">
         <div className="relative overflow-hidden rounded-xl bg-bg-elevated shadow-card transition-all duration-500 group-hover:shadow-card-hover group-hover:-translate-y-2 aspect-[2/3]">
           {/* Gradient border on hover */}
           <div className="absolute inset-0 rounded-xl border border-border/50 group-hover:border-accent/20 transition-colors duration-500 z-20 pointer-events-none" />
@@ -52,14 +59,14 @@ export default function MovieCard({ movie, index = 0, size = "default" }: MovieC
           {movie.poster_path ? (
             <Image
               src={img(movie.poster_path, "w500")}
-              alt={movie.title}
+              alt={displayTitle || ""}
               fill
               className="object-cover transition-transform duration-700 group-hover:scale-110"
               sizes={size === "large" ? "(max-width: 768px) 50vw, 240px" : "(max-width: 768px) 40vw, 185px"}
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-bg-surface p-4">
-              <span className="font-display text-sm text-text-tertiary text-center italic">{movie.title}</span>
+              <span className="font-display text-sm text-text-tertiary text-center italic">{displayTitle}</span>
             </div>
           )}
 
@@ -101,14 +108,14 @@ export default function MovieCard({ movie, index = 0, size = "default" }: MovieC
 
       {/* Title + year */}
       <div className="flex flex-col gap-0.5 px-0.5">
-        <Link href={`/movie/${movie.id}`}>
+        <Link href={targetRoute}>
           <h3 className="font-body text-[13px] font-medium text-text-primary line-clamp-1 group-hover:text-accent transition-colors duration-300">
-            {movie.title}
+            {displayTitle}
           </h3>
         </Link>
-        {movie.release_date && (
+        {displayDate && (
           <span className="text-[11px] text-text-tertiary font-mono">
-            {new Date(movie.release_date).getFullYear()}
+            {new Date(displayDate).getFullYear()}
           </span>
         )}
       </div>

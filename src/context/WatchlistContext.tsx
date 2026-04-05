@@ -12,6 +12,7 @@ type StoredMovie = {
   poster_path: string | null;
   vote_average: number;
   release_date: string;
+  media_type: "movie" | "tv";
   addedAt: number;
 };
 
@@ -19,25 +20,26 @@ interface WatchlistContextType {
   user: User | null;
   watchlist: StoredMovie[];
   favorites: StoredMovie[];
-  addToWatchlist: (movie: TMDBMovie) => void;
+  addToWatchlist: (movie: any) => void;
   removeFromWatchlist: (id: number) => void;
   isInWatchlist: (id: number) => boolean;
-  addToFavorites: (movie: TMDBMovie) => void;
+  addToFavorites: (movie: any) => void;
   removeFromFavorites: (id: number) => void;
   isInFavorites: (id: number) => boolean;
-  toggleWatchlist: (movie: TMDBMovie) => void;
-  toggleFavorites: (movie: TMDBMovie) => void;
+  toggleWatchlist: (movie: any) => void;
+  toggleFavorites: (movie: any) => void;
 }
 
 const WatchlistContext = createContext<WatchlistContextType | null>(null);
 
-function movieToStored(movie: TMDBMovie): StoredMovie {
+function movieToStored(movie: any): StoredMovie {
   return {
     id: movie.id,
-    title: movie.title,
+    title: movie.title || movie.name,
     poster_path: movie.poster_path,
     vote_average: movie.vote_average,
-    release_date: movie.release_date || "",
+    release_date: movie.release_date || movie.first_air_date || "",
+    media_type: movie.media_type || (movie.name ? "tv" : "movie"),
     addedAt: Date.now(),
   };
 }
@@ -69,8 +71,8 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
         const { data: wlData } = await supabase.from('watchlist').select('*').eq('user_id', user.id).order('added_at', { ascending: false });
         const { data: favData } = await supabase.from('favorites').select('*').eq('user_id', user.id).order('added_at', { ascending: false });
         
-        if (wlData) setCloudWatchlist(wlData.map(d => ({ ...d, id: d.movie_id })));
-        if (favData) setCloudFavorites(favData.map(d => ({ ...d, id: d.movie_id })));
+        if (wlData) setCloudWatchlist(wlData.map(d => ({ ...d, id: d.movie_id, media_type: d.media_type || "movie" })));
+        if (favData) setCloudFavorites(favData.map(d => ({ ...d, id: d.movie_id, media_type: d.media_type || "movie" })));
       }
       fetchCloudData();
     } else {
@@ -85,7 +87,7 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
   const isInWatchlist = useCallback((id: number) => activeWatchlist.some((m) => m.id === id), [activeWatchlist]);
   const isInFavorites = useCallback((id: number) => activeFavorites.some((m) => m.id === id), [activeFavorites]);
 
-  const addToWatchlist = useCallback(async (movie: TMDBMovie) => {
+  const addToWatchlist = useCallback(async (movie: any) => {
     if (isInWatchlist(movie.id)) return;
     const stored = movieToStored(movie);
 
@@ -93,11 +95,12 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
       setCloudWatchlist(prev => [stored, ...prev]);
       await supabase.from('watchlist').insert({
         user_id: user.id,
-        movie_id: movie.id,
-        title: movie.title,
-        poster_path: movie.poster_path,
-        vote_average: movie.vote_average,
-        release_date: movie.release_date
+        movie_id: stored.id,
+        title: stored.title,
+        poster_path: stored.poster_path,
+        vote_average: stored.vote_average,
+        release_date: stored.release_date,
+        media_type: stored.media_type
       });
     } else {
       setLocalWatchlist(prev => [stored, ...prev]);
@@ -113,7 +116,7 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
     }
   }, [user, setLocalWatchlist]);
 
-  const addToFavorites = useCallback(async (movie: TMDBMovie) => {
+  const addToFavorites = useCallback(async (movie: any) => {
     if (isInFavorites(movie.id)) return;
     const stored = movieToStored(movie);
 
@@ -121,11 +124,12 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
       setCloudFavorites(prev => [stored, ...prev]);
       await supabase.from('favorites').insert({
         user_id: user.id,
-        movie_id: movie.id,
-        title: movie.title,
-        poster_path: movie.poster_path,
-        vote_average: movie.vote_average,
-        release_date: movie.release_date
+        movie_id: stored.id,
+        title: stored.title,
+        poster_path: stored.poster_path,
+        vote_average: stored.vote_average,
+        release_date: stored.release_date,
+        media_type: stored.media_type
       });
     } else {
       setLocalFavorites(prev => [stored, ...prev]);
