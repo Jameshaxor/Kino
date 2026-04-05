@@ -74,24 +74,44 @@ export default function Navbar({ onOpenSearch }: NavbarProps) {
 
               {/* Auth Button */}
               {user ? (
-                <button
-                  onClick={() => supabase.auth.signOut()}
-                  className="flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-full bg-bg-elevated border border-border text-text-secondary hover:text-accent hover:border-accent/30 transition-colors"
-                  title="Sign Out"
-                >
-                  {user.user_metadata?.avatar_url ? (
-                    <img src={user.user_metadata.avatar_url} alt="Avatar" className="w-full h-full rounded-full object-cover" />
-                  ) : (
-                    <LogOut className="w-4 h-4" />
-                  )}
-                </button>
+                <div className="relative group/auth">
+                  <button
+                    className="flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-full bg-bg-elevated border border-border text-text-secondary group-hover/auth:border-accent/50 transition-colors overflow-hidden"
+                  >
+                    {user.user_metadata?.avatar_url ? (
+                      <img src={user.user_metadata.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-accent/20 flex items-center justify-center">
+                        <span className="font-display font-medium text-accent text-sm">
+                           {user.email?.charAt(0).toUpperCase() || 'U'}
+                        </span>
+                      </div>
+                    )}
+                  </button>
+
+                  <div className="absolute top-full right-0 mt-2 w-48 opacity-0 invisible group-hover/auth:opacity-100 group-hover/auth:visible transition-all duration-200 translate-y-2 group-hover/auth:translate-y-0 backdrop-blur-xl bg-bg-elevated/95 border border-border rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.4)] overflow-hidden">
+                    <div className="px-4 py-3 border-b border-border/50">
+                      <p className="text-[10px] text-text-tertiary font-mono uppercase tracking-wider mb-0.5">Signed in as</p>
+                      <p className="text-sm font-medium text-text-primary truncate">{user.email}</p>
+                    </div>
+                    <div className="p-1.5">
+                      <button 
+                        onClick={() => supabase.auth.signOut()} 
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-sm rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors text-left font-medium"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Sign Out
+                      </button>
+                    </div>
+                  </div>
+                </div>
               ) : (
                 <button
                   onClick={() => setAuthModalOpen(true)}
-                  className="flex items-center gap-2 px-3 py-2 md:px-4 md:py-2 rounded-lg bg-white text-black font-semibold text-xs md:text-sm hover:bg-white/90 transition-colors"
+                  className="btn-gold px-3 mb-0.5 py-1.5 md:px-4 md:py-2 text-xs md:text-sm flex items-center gap-1.5"
                 >
-                  <LogIn className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                  <span className="hidden sm:inline">Sign In</span>
+                  <UserIcon className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline font-semibold">Sign In</span>
                 </button>
               )}
 

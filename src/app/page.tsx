@@ -245,19 +245,13 @@ export default function HomePage() {
           </div>
           <div className="flex flex-wrap gap-2.5">
             {GENRE_LIST.slice(0, 12).map((genre, i) => (
-              <motion.div
+              <Link
                 key={genre.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.03 }}
+                href={`/explore/genre/${genre.id}`}
+                className="px-4 py-2.5 rounded-lg bg-bg-elevated border border-border text-sm text-text-secondary hover:text-accent hover:border-accent/30 hover:bg-accent-muted hover:shadow-gold transition-all duration-300"
               >
-                <Link
-                  href={`/explore/genre/${genre.id}`}
-                  className="px-4 py-2.5 rounded-lg bg-bg-elevated border border-border text-sm text-text-secondary hover:text-accent hover:border-accent/30 hover:bg-accent-muted hover:shadow-gold transition-all duration-300"
-                >
-                  {genre.name}
-                </Link>
-              </motion.div>
+                {genre.name}
+              </Link>
             ))}
             <Link
               href="/explore"
