@@ -10,7 +10,7 @@ export default function Footer() {
           <div className="flex flex-col gap-3">
             <KinoLogo size="small" />
             <p className="text-sm text-text-tertiary max-w-xs">
-              A premium movie discovery platform powered by AI. Find your next favorite film.
+              A premium multi-media discovery platform powered by AI. Find your next favorite film, series, or anime.
             </p>
           </div>
 
@@ -33,7 +33,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="mt-10 pt-6 border-t border-border/30 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-text-tertiary">
-            © {new Date().getFullYear()} KINO. Built with obsessive attention to cinema.
+            © {new Date().getFullYear()} KINO. Founded by Manu Haxor. Built with obsessive attention to cinema.
           </p>
           <a
             href="https://www.themoviedb.org/"
