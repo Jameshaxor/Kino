@@ -25,12 +25,17 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     try {
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        if (error) {
+          if (error.message.toLowerCase().includes("email not confirmed")) {
+            throw new Error("Please verify your email address. Check your inbox!");
+          }
+          throw error;
+        }
         onClose();
       } else {
         const { error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
-        setSuccessMsg("Account created! You can now log in.");
+        setSuccessMsg("Welcome! Please check your email inbox to verify your account before signing in.");
         setIsLogin(true);
         setPassword("");
       }
