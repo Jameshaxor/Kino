@@ -11,6 +11,7 @@ import Carousel from "@/components/ui/Carousel";
 import WatchProviders from "@/components/ui/WatchProviders";
 import { DetailSkeleton } from "@/components/ui/Skeleton";
 import { useWatchlist } from "@/context/WatchlistContext";
+import ShareButton from "@/components/ui/ShareButton";
 
 export default function TVDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -269,6 +270,10 @@ export default function TVDetailPage({ params }: { params: Promise<{ id: string 
                 <Heart className="w-4 h-4" fill={isInFavorites(tvShow.id) ? "currentColor" : "none"} />
                 {isInFavorites(tvShow.id) ? "Favorited" : "Favorite"}
               </button>
+              <ShareButton
+                type="movie"
+                items={[{ title: tvShow.name, year: tvShow.first_air_date ? parseInt(tvShow.first_air_date) : undefined, poster_path: tvShow.poster_path }]}
+              />
             </div>
           </motion.div>
         </div>

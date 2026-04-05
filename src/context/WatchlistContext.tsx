@@ -13,6 +13,7 @@ type StoredMovie = {
   vote_average: number;
   release_date: string;
   media_type: "movie" | "tv";
+  genre_ids?: number[];
   addedAt: number;
 };
 
@@ -40,6 +41,7 @@ function movieToStored(movie: any): StoredMovie {
     vote_average: movie.vote_average,
     release_date: movie.release_date || movie.first_air_date || "",
     media_type: movie.media_type || (movie.name ? "tv" : "movie"),
+    genre_ids: movie.genres ? movie.genres.map((g: any) => g.id) : (movie.genre_ids || []),
     addedAt: Date.now(),
   };
 }

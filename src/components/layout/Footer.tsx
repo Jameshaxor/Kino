@@ -20,6 +20,7 @@ export default function Footer() {
               <span className="text-xs font-mono text-text-tertiary uppercase tracking-wider">Navigate</span>
               <Link href="/explore" className="text-sm text-text-secondary hover:text-text-primary transition-colors">Explore</Link>
               <Link href="/browse" className="text-sm text-text-secondary hover:text-text-primary transition-colors">Browse</Link>
+              <Link href="/feed" className="text-sm text-text-secondary hover:text-text-primary transition-colors">Feed</Link>
               <Link href="/ai" className="text-sm text-text-secondary hover:text-text-primary transition-colors">AI Oracle</Link>
             </div>
             <div className="flex flex-col gap-2.5">
@@ -32,9 +33,21 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="mt-10 pt-6 border-t border-border/30 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-text-tertiary">
-            © {new Date().getFullYear()} KINO. Crafted by <span className="text-accent font-medium hover:text-accent-hover transition-colors cursor-default">Manu Haxor</span> · Built with obsessive attention to cinema.
-          </p>
+          <div className="text-xs text-text-tertiary flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
+            <span>© {new Date().getFullYear()} KINO.</span>
+            <span className="hidden sm:inline">·</span>
+            <span className="flex items-center">
+              Crafted by 
+              <span className="relative inline-flex items-center justify-center px-2 py-0.5 ml-1.5 overflow-hidden rounded border border-accent/20 bg-bg-surface transition-all duration-500 hover:border-accent/50 hover:shadow-[0_0_10px_rgba(139,92,246,0.3)] cursor-default group">
+                <span className="absolute inset-0 bg-gradient-to-tr from-accent/0 via-accent/10 to-accent/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-out" />
+                <span className="relative font-mono text-[10px] uppercase font-extrabold tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-accent to-[#d4b4fe]">
+                  Manu Haxor
+                </span>
+              </span>
+            </span>
+            <span className="hidden sm:inline">·</span>
+            <span className="italic">Obsessive about cinema.</span>
+          </div>
           <a
             href="https://www.themoviedb.org/"
             target="_blank"

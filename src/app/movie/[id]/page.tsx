@@ -12,6 +12,7 @@ import Carousel from "@/components/ui/Carousel";
 import WatchProviders from "@/components/ui/WatchProviders";
 import { DetailSkeleton } from "@/components/ui/Skeleton";
 import { useWatchlist } from "@/context/WatchlistContext";
+import ShareButton from "@/components/ui/ShareButton";
 
 export default function MovieDetailPage() {
   const params = useParams();
@@ -261,6 +262,10 @@ export default function MovieDetailPage() {
                 <Heart className="w-4 h-4" fill={isInFavorites(movie.id) ? "currentColor" : "none"} />
                 {isInFavorites(movie.id) ? "Favorited" : "Favorite"}
               </button>
+              <ShareButton
+                type="movie"
+                items={[{ title: movie.title, year: movie.release_date ? parseInt(movie.release_date) : undefined, poster_path: movie.poster_path }]}
+              />
             </div>
           </motion.div>
         </div>

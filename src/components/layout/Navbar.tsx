@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, Sparkles, Bookmark, Compass, Menu, X, LogIn, LogOut, User as UserIcon } from "lucide-react";
+import { Search, Sparkles, Bookmark, Compass, Menu, X, LogIn, LogOut, User as UserIcon, TrendingUp } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import KinoLogo from "@/components/ui/KinoLogo";
@@ -33,11 +33,13 @@ function UserProfileDropdown({ user, supabase }: { user: any; supabase: any }) {
     <>
       <button
         onClick={() => { setIsOpen(!isOpen); setConfirmSignOut(false); }}
-        className={`relative z-50 flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-full bg-bg-elevated border transition-all overflow-hidden ${
-          isOpen ? 'border-accent shadow-[0_0_15px_rgba(139,92,246,0.3)]' : 'border-border hover:border-accent/50'
+        className={`relative z-50 flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-full bg-bg-elevated border transition-all duration-300 overflow-hidden ${
+          isOpen 
+            ? 'border-accent shadow-[0_0_20px_rgba(139,92,246,0.5)] scale-110' 
+            : 'border-border hover:border-accent hover:shadow-[0_0_15px_rgba(139,92,246,0.4)] hover:scale-110'
         }`}
       >
-        <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+        <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover transition-transform duration-300" />
       </button>
 
       <AnimatePresence>
@@ -99,6 +101,7 @@ export default function Navbar({ onOpenSearch }: NavbarProps) {
 
   const navLinks = [
     { href: "/", label: "Discover", icon: Sparkles },
+    { href: "/feed", label: "Feed", icon: TrendingUp },
     { href: "/browse", label: "Browse", icon: Compass },
     { href: "/library", label: "My Library", icon: Bookmark },
   ];
