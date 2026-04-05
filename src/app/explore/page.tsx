@@ -76,7 +76,7 @@ export default function ExplorePage() {
           <div className="section-line" />
         </div>
         <h1 className="text-4xl md:text-5xl font-display font-bold text-text-primary tracking-tight">
-          Explore Cinema
+          Explore
         </h1>
         <p className="text-text-secondary text-lg max-w-xl">
           Dive into genre worlds, travel through decades, or let curiosity guide you.

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Search, Sparkles, Bookmark, Compass, Menu, X, LogIn, LogOut, User as UserIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,16 +12,29 @@ import AuthModal from "@/components/ui/AuthModal";
 
 function UserProfileDropdown({ user, supabase }: { user: any; supabase: any }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [confirmSignOut, setConfirmSignOut] = useState(false);
   
   // Custom Dicebear avatar if no Google photo
   const avatarUrl = user.user_metadata?.avatar_url || `https://api.dicebear.com/9.x/shapes/svg?seed=${user.email}&backgroundColor=c0aede,d1d4f9,ffdfbf,ffd5dc`;
 
+  // Reset confirmation if dropdown closes or after timeout
+  const handleSignOutClick = () => {
+    if (confirmSignOut) {
+      setIsOpen(false);
+      setConfirmSignOut(false);
+      supabase.auth.signOut();
+    } else {
+      setConfirmSignOut(true);
+      setTimeout(() => setConfirmSignOut(false), 3000);
+    }
+  };
+
   return (
     <>
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => { setIsOpen(!isOpen); setConfirmSignOut(false); }}
         className={`relative z-50 flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-full bg-bg-elevated border transition-all overflow-hidden ${
-          isOpen ? 'border-accent shadow-[0_0_15px_rgba(212,168,67,0.3)]' : 'border-border hover:border-accent/50'
+          isOpen ? 'border-accent shadow-[0_0_15px_rgba(139,92,246,0.3)]' : 'border-border hover:border-accent/50'
         }`}
       >
         <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
@@ -30,7 +44,7 @@ function UserProfileDropdown({ user, supabase }: { user: any; supabase: any }) {
         {isOpen && (
           <>
             {/* Invisible full-screen overlay to catch outside clicks */}
-            <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+            <div className="fixed inset-0 z-40" onClick={() => { setIsOpen(false); setConfirmSignOut(false); }} />
             
             <motion.div
               initial={{ opacity: 0, y: 10, scale: 0.95 }}
@@ -43,16 +57,17 @@ function UserProfileDropdown({ user, supabase }: { user: any; supabase: any }) {
                 <p className="text-[10px] text-text-tertiary font-mono uppercase tracking-wider mb-0.5">Signed in as</p>
                 <p className="text-sm font-medium text-text-primary truncate">{user.email}</p>
               </div>
-              <div className="p-1.5 focus-within:bg-bg-surface">
+              <div className="p-1.5">
                 <button 
-                  onClick={() => {
-                    setIsOpen(false);
-                    supabase.auth.signOut();
-                  }} 
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-sm rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors text-left font-medium"
+                  onClick={handleSignOutClick}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm rounded-lg transition-colors text-left font-medium ${
+                    confirmSignOut 
+                      ? "text-red-300 bg-red-500/15 border border-red-500/20" 
+                      : "text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                  }`}
                 >
                   <LogOut className="w-4 h-4" />
-                  Sign Out
+                  {confirmSignOut ? "Confirm Sign Out?" : "Sign Out"}
                 </button>
               </div>
             </motion.div>
@@ -69,6 +84,7 @@ interface NavbarProps {
 
 export default function Navbar({ onOpenSearch }: NavbarProps) {
   const { user } = useWatchlist();
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -105,12 +121,18 @@ export default function Navbar({ onOpenSearch }: NavbarProps) {
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-8">
-              {navLinks.map((link) => (
-                <Link key={link.href} href={link.href} className="flex items-center gap-2 text-sm font-medium text-text-secondary hover:text-white transition-colors">
-                  <link.icon className="w-4 h-4" />
-                  <span>{link.label}</span>
-                </Link>
-              ))}
+              {navLinks.map((link) => {
+                const isActive = link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
+                return (
+                  <Link key={link.href} href={link.href} className={`relative flex items-center gap-2 text-sm font-medium transition-colors ${
+                    isActive ? "text-accent" : "text-text-secondary hover:text-white"
+                  }`}>
+                    <link.icon className="w-4 h-4" />
+                    <span>{link.label}</span>
+                    {isActive && <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-accent" />}
+                  </Link>
+                );
+              })}
             </nav>
 
             {/* Search + Auth + Mobile toggle */}
@@ -129,13 +151,6 @@ export default function Navbar({ onOpenSearch }: NavbarProps) {
               {/* Auth Button */}
               {user ? (
                 <div className="relative z-50">
-                  <button
-                    onClick={() => setMobileOpen(!mobileOpen)} // Reuse mobileOpen, or we can use a new state. Actually, let's just use a dedicated profile state.
-                    className="hidden" // Will be replaced, need a state var. Let's create profileOpen inline or at top.
-                  />
-                  {/* Since I didn't inject a useState var, I will use a simple inline click or re-purpose mobileOpen just for the local dropdown if needed. 
-                      Actually, `mobileOpen` is for the whole mobile nav. I will extract a small component or just add state on component level.
-                  */}
                   <UserProfileDropdown user={user} supabase={supabase} />
                 </div>
               ) : (

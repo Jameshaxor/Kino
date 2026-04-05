@@ -19,13 +19,13 @@ export default function Footer() {
             <div className="flex flex-col gap-2.5">
               <span className="text-xs font-mono text-text-tertiary uppercase tracking-wider">Navigate</span>
               <Link href="/explore" className="text-sm text-text-secondary hover:text-text-primary transition-colors">Explore</Link>
+              <Link href="/browse" className="text-sm text-text-secondary hover:text-text-primary transition-colors">Browse</Link>
               <Link href="/ai" className="text-sm text-text-secondary hover:text-text-primary transition-colors">AI Oracle</Link>
-              <Link href="/search" className="text-sm text-text-secondary hover:text-text-primary transition-colors">Search</Link>
             </div>
             <div className="flex flex-col gap-2.5">
               <span className="text-xs font-mono text-text-tertiary uppercase tracking-wider">Library</span>
-              <Link href="/watchlist" className="text-sm text-text-secondary hover:text-text-primary transition-colors">Watchlist</Link>
-              <Link href="/favorites" className="text-sm text-text-secondary hover:text-text-primary transition-colors">Favorites</Link>
+              <Link href="/library" className="text-sm text-text-secondary hover:text-text-primary transition-colors">Watchlist</Link>
+              <Link href="/library" className="text-sm text-text-secondary hover:text-text-primary transition-colors">Favorites</Link>
             </div>
           </div>
         </div>
@@ -33,7 +33,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="mt-10 pt-6 border-t border-border/30 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-text-tertiary">
-            © {new Date().getFullYear()} KINO. Founded by Manu Haxor. Built with obsessive attention to cinema.
+            © {new Date().getFullYear()} KINO. Crafted by <span className="text-accent font-medium hover:text-accent-hover transition-colors cursor-default">Manu Haxor</span> · Built with obsessive attention to cinema.
           </p>
           <a
             href="https://www.themoviedb.org/"

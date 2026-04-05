@@ -51,7 +51,7 @@ export default async function BrowsePage() {
         <header className="mb-12">
           <h1 className="text-4xl md:text-5xl font-display font-medium text-white mb-4">Browse Catalog</h1>
           <p className="text-text-secondary text-lg max-w-2xl">
-            Explore a curated selection of the most popular and critically acclaimed films in cinematic history.
+            Explore a curated selection of the most popular and critically acclaimed films, TV shows, and anime.
           </p>
         </header>
 

@@ -231,7 +231,14 @@ export default function HomePage() {
           )}
         </section>
       ) : loading ? (
-        <div className="w-full h-[75vh] md:h-[92vh] bg-bg-primary" />
+        <div className="w-full h-[75vh] md:h-[92vh] bg-bg-primary relative overflow-hidden">
+          <div className="absolute inset-0 bg-[linear-gradient(110deg,var(--color-bg-primary)_8%,var(--color-bg-elevated)_18%,var(--color-bg-primary)_33%)] bg-[length:200%_100%] animate-shimmer" />
+          <div className="absolute bottom-20 left-8 flex flex-col gap-4 z-10">
+            <div className="h-3 w-32 bg-bg-elevated rounded" />
+            <div className="h-12 w-80 bg-bg-elevated rounded" />
+            <div className="h-5 w-64 bg-bg-elevated rounded" />
+          </div>
+        </div>
       ) : null}
 
       {/* ═══════════ DISCOVERY FEED ═══════════ */}
@@ -363,7 +370,7 @@ export default function HomePage() {
           <Link href="/ai">
             <div className="relative overflow-hidden rounded-2xl border border-accent/10 p-8 md:p-14 group transition-all duration-700 hover:border-accent/25">
               {/* Animated gradient bg */}
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(212,168,67,0.08)_0%,transparent_60%)] group-hover:bg-[radial-gradient(ellipse_at_top_right,rgba(212,168,67,0.15)_0%,transparent_60%)] transition-all duration-700" />
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(139,92,246,0.08)_0%,transparent_60%)] group-hover:bg-[radial-gradient(ellipse_at_top_right,rgba(139,92,246,0.15)_0%,transparent_60%)] transition-all duration-700" />
               <div className="absolute inset-0 bg-bg-elevated" style={{ zIndex: -1 }} />
 
               <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-8">

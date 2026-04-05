@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { img } from "@/lib/tmdb";
 import { Star, Bookmark, Heart } from "lucide-react";
-import { motion } from "framer-motion";
 import { useWatchlist } from "@/context/WatchlistContext";
 
 export interface MovieCardMovie {

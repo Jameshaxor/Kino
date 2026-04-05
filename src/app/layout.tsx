@@ -26,12 +26,12 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "KINO — Premium Movie Discovery",
-  description: "Discover your next favorite film with AI-powered recommendations, curated collections, and a cinematic browsing experience.",
-  keywords: ["movies", "film", "recommendations", "AI", "cinema", "TMDB"],
+  title: "KINO — Premium Multi-Media Discovery",
+  description: "Discover your next favorite film, TV show, or anime with AI-powered recommendations, curated collections, and a cinematic browsing experience.",
+  keywords: ["movies", "TV shows", "anime", "series", "film", "recommendations", "AI", "TMDB"],
   openGraph: {
-    title: "KINO — Premium Movie Discovery",
-    description: "Discover your next favorite film with AI-powered recommendations.",
+    title: "KINO — Premium Multi-Media Discovery",
+    description: "Discover your next favorite film, TV show, or anime with AI-powered recommendations.",
     type: "website",
   },
 };
