@@ -56,15 +56,12 @@ export default function Carousel({ title, subtitle, icon, children }: CarouselPr
 
       {/* Scroll container */}
       <div className="relative">
-        {/* Adjusted bottom limit so shadow gradients only cover posters and not text */}
-        <div className="absolute left-0 top-0 bottom-[60px] w-6 bg-gradient-to-r from-bg-primary to-transparent z-10 pointer-events-none md:hidden" />
         <div
           ref={scrollRef}
           className="flex gap-4 md:gap-5 overflow-x-auto hide-scrollbar px-6 md:px-0 pb-4 scroll-smooth snap-x snap-mandatory"
         >
           {children}
         </div>
-        <div className="absolute right-0 top-0 bottom-[60px] w-6 bg-gradient-to-l from-bg-primary to-transparent z-10 pointer-events-none md:hidden" />
       </div>
     </div>
   );

@@ -122,7 +122,7 @@ export default function AIOraclePage() {
               <button
                 type="submit"
                 disabled={loading || !query.trim()}
-                className="m-2 px-6 py-3 rounded-xl bg-gradient-to-r from-accent to-[#C49530] text-bg-primary font-bold text-sm disabled:opacity-30 hover:shadow-gold-lg transition-all flex items-center gap-2"
+                className="m-2 px-6 py-3 rounded-xl bg-gradient-to-r from-accent to-[#E0B85C] text-black font-bold text-sm disabled:opacity-30 shadow-[0_0_15px_rgba(212,168,67,0.3)] hover:shadow-[0_0_25px_rgba(212,168,67,0.6)] hover:scale-105 transition-all duration-300 flex items-center gap-2"
               >
                 {loading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />

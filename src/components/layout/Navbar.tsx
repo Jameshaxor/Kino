@@ -9,6 +9,60 @@ import { useWatchlist } from "@/context/WatchlistContext";
 import { supabase } from "@/lib/supabase";
 import AuthModal from "@/components/ui/AuthModal";
 
+function UserProfileDropdown({ user, supabase }: { user: any; supabase: any }) {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  // Custom Dicebear avatar if no Google photo
+  const avatarUrl = user.user_metadata?.avatar_url || `https://api.dicebear.com/9.x/avataaars/svg?seed=${user.email}&backgroundColor=c0aede,d1d4f9,ffdfbf,ffd5dc`;
+
+  return (
+    <>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={`relative z-50 flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-full bg-bg-elevated border transition-all overflow-hidden ${
+          isOpen ? 'border-accent shadow-[0_0_15px_rgba(212,168,67,0.3)]' : 'border-border hover:border-accent/50'
+        }`}
+      >
+        <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            {/* Invisible full-screen overlay to catch outside clicks */}
+            <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+            
+            <motion.div
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.95 }}
+              transition={{ duration: 0.15 }}
+              className="absolute right-0 top-full mt-2 w-48 z-50 backdrop-blur-xl bg-bg-elevated/95 border border-border rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.4)] overflow-hidden"
+            >
+              <div className="px-4 py-3 border-b border-border/50">
+                <p className="text-[10px] text-text-tertiary font-mono uppercase tracking-wider mb-0.5">Signed in as</p>
+                <p className="text-sm font-medium text-text-primary truncate">{user.email}</p>
+              </div>
+              <div className="p-1.5 focus-within:bg-bg-surface">
+                <button 
+                  onClick={() => {
+                    setIsOpen(false);
+                    supabase.auth.signOut();
+                  }} 
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-sm rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors text-left font-medium"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign Out
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
+
 interface NavbarProps {
   onOpenSearch: () => void;
 }
@@ -74,36 +128,15 @@ export default function Navbar({ onOpenSearch }: NavbarProps) {
 
               {/* Auth Button */}
               {user ? (
-                <div className="relative group/auth">
+                <div className="relative z-50">
                   <button
-                    className="flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-full bg-bg-elevated border border-border text-text-secondary group-hover/auth:border-accent/50 transition-colors overflow-hidden"
-                  >
-                    {user.user_metadata?.avatar_url ? (
-                      <img src={user.user_metadata.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full bg-accent/20 flex items-center justify-center">
-                        <span className="font-display font-medium text-accent text-sm">
-                           {user.email?.charAt(0).toUpperCase() || 'U'}
-                        </span>
-                      </div>
-                    )}
-                  </button>
-
-                  <div className="absolute top-full right-0 mt-2 w-48 opacity-0 invisible group-hover/auth:opacity-100 group-hover/auth:visible transition-all duration-200 translate-y-2 group-hover/auth:translate-y-0 backdrop-blur-xl bg-bg-elevated/95 border border-border rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.4)] overflow-hidden">
-                    <div className="px-4 py-3 border-b border-border/50">
-                      <p className="text-[10px] text-text-tertiary font-mono uppercase tracking-wider mb-0.5">Signed in as</p>
-                      <p className="text-sm font-medium text-text-primary truncate">{user.email}</p>
-                    </div>
-                    <div className="p-1.5">
-                      <button 
-                        onClick={() => supabase.auth.signOut()} 
-                        className="w-full flex items-center gap-2.5 px-3 py-2 text-sm rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors text-left font-medium"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        Sign Out
-                      </button>
-                    </div>
-                  </div>
+                    onClick={() => setMobileOpen(!mobileOpen)} // Reuse mobileOpen, or we can use a new state. Actually, let's just use a dedicated profile state.
+                    className="hidden" // Will be replaced, need a state var. Let's create profileOpen inline or at top.
+                  />
+                  {/* Since I didn't inject a useState var, I will use a simple inline click or re-purpose mobileOpen just for the local dropdown if needed. 
+                      Actually, `mobileOpen` is for the whole mobile nav. I will extract a small component or just add state on component level.
+                  */}
+                  <UserProfileDropdown user={user} supabase={supabase} />
                 </div>
               ) : (
                 <button
