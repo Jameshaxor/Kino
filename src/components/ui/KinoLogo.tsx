@@ -31,13 +31,13 @@ export default function KinoLogo({ className = "", size = "default" }: { classNa
       {/* Wordmark */}
       <div className="flex flex-col pt-0.5">
         <span
-          className={`font-display font-medium ${s.text} tracking-[0.2em] text-text-primary group-hover:text-white transition-colors duration-700`}
+          className={`font-display font-medium ${s.text} tracking-[0.2em] text-text-primary group-hover:text-white transition-colors duration-700 leading-none`}
         >
           KINO
         </span>
         {size !== "small" && (
-          <span className={`${s.tagline} font-body text-text-tertiary uppercase tracking-[0.55em] mt-1 ml-1 font-medium group-hover:text-text-secondary transition-colors duration-700`}>
-            Cinema
+          <span className={`${s.tagline} font-body text-text-tertiary uppercase tracking-[0.55em] mt-1 ml-1 font-medium group-hover:text-text-secondary transition-colors duration-700 leading-none`}>
+            Discovery
           </span>
         )}
       </div>

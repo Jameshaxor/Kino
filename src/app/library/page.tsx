@@ -25,7 +25,7 @@ export default function LibraryPage() {
                 <AlertCircle className="w-5 h-5 text-accent shrink-0 mt-0.5" />
                 <p className="text-sm text-text-secondary">
                   You are currently viewing a temporary local library. <br className="hidden sm:block" />
-                  <span className="text-text-primary">Sign in to permanently save and sync your movies.</span>
+                  <span className="text-text-primary">Sign in to permanently save and sync your titles.</span>
                 </p>
               </div>
               <button 
@@ -45,13 +45,13 @@ export default function LibraryPage() {
             </div>
             <h2 className="text-2xl font-display font-medium text-white mb-2">Your library is empty</h2>
             <p className="text-text-secondary max-w-md mb-8">
-              You haven't saved any movies yet. Explore our catalog and click the heart or bookmark icons to start building your collection.
+              You haven't saved any titles yet. Explore our catalog and click the heart or bookmark icons to start building your collection.
             </p>
             <Link 
               href="/browse"
               className="px-6 py-3 bg-white text-black font-semibold rounded-lg hover:bg-white/90 transition-colors"
             >
-              Discover Movies
+              Discover Content
             </Link>
           </div>
         ) : (
