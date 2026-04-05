@@ -42,18 +42,19 @@ export default function MovieCard({ movie, index = 0, size = "default" }: MovieC
 
   return (
     <div
-      className={`group relative flex flex-col gap-3 snap-start ${
+      className={`group relative flex flex-col gap-3 snap-start select-none touch-pan-y active:scale-[0.98] transition-transform duration-200 ${
         size === "large" ? "min-w-[200px] md:min-w-[240px]" : "min-w-[150px] md:min-w-[185px]"
       }`}
+      style={{ WebkitTouchCallout: 'none' }}
     >
-      <Link href={targetRoute} className="block">
+      <Link href={targetRoute} className="block outline-none" prefetch={false}>
         <div className="relative overflow-hidden rounded-xl bg-bg-elevated shadow-card transition-all duration-500 group-hover:shadow-card-hover md:group-hover:-translate-y-2 aspect-[2/3]">
           {/* Gradient border on hover */}
           <div className="absolute inset-0 rounded-xl border border-border/50 group-hover:border-accent/20 transition-colors duration-500 z-30 pointer-events-none" />
 
-          {/* Premium Glint Sheen */}
-          <div className="absolute inset-0 z-20 pointer-events-none overflow-hidden rounded-xl opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-300">
-            <div className="absolute top-0 left-[-150%] w-[100%] h-[200%] bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-[-25deg] transition-all duration-[800ms] group-hover:translate-x-[350%] group-hover:translate-y-[-20%] group-active:translate-x-[-50%] group-active:translate-y-[0%] group-active:transition-none" />
+          {/* Premium Glint Sheen (Desktop Only to prevent touch hijack) */}
+          <div className="absolute inset-0 z-20 pointer-events-none overflow-hidden rounded-xl opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 hidden md:block">
+            <div className="absolute top-0 left-[-150%] w-[100%] h-[200%] bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-[-25deg] transition-all duration-[800ms] group-hover:translate-x-[350%] group-hover:translate-y-[-20%]" />
           </div>
 
           {movie.poster_path ? (
@@ -61,7 +62,7 @@ export default function MovieCard({ movie, index = 0, size = "default" }: MovieC
               src={img(movie.poster_path, "w500")}
               alt={displayTitle || ""}
               fill
-              className="object-cover transition-transform duration-700 group-hover:scale-110 group-active:scale-[1.12]"
+              className="object-cover transition-transform duration-700 md:group-hover:scale-110"
               sizes={size === "large" ? "(max-width: 768px) 50vw, 240px" : "(max-width: 768px) 40vw, 185px"}
             />
           ) : (

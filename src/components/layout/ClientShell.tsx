@@ -7,6 +7,7 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import CommandPalette from "./CommandPalette";
 import ScrollToTop from "@/components/ui/ScrollToTop";
+import AuthGreeting from "@/components/ui/AuthGreeting";
 import { WatchlistProvider } from "@/context/WatchlistContext";
 
 function PageTransition({ children }: { children: React.ReactNode }) {
@@ -51,6 +52,7 @@ export default function ClientShell({ children }: { children: React.ReactNode })
       </main>
       <Footer />
       <ScrollToTop />
+      <AuthGreeting />
       <CommandPalette isOpen={searchOpen} onClose={closeSearch} />
     </WatchlistProvider>
   );
