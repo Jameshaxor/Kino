@@ -42,7 +42,7 @@ export default function MovieCard({ movie, index = 0, size = "default" }: MovieC
 
   return (
     <div
-      className={`group relative flex flex-col gap-3 snap-start select-none touch-pan-y active:scale-[0.98] transition-transform duration-200 ${
+      className={`group relative flex flex-col gap-3 snap-start select-none active:scale-[0.98] transition-transform duration-200 ${
         size === "large" ? "min-w-[200px] md:min-w-[240px]" : "min-w-[150px] md:min-w-[185px]"
       }`}
       style={{ WebkitTouchCallout: 'none' }}
