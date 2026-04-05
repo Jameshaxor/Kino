@@ -13,7 +13,7 @@ function UserProfileDropdown({ user, supabase }: { user: any; supabase: any }) {
   const [isOpen, setIsOpen] = useState(false);
   
   // Custom Dicebear avatar if no Google photo
-  const avatarUrl = user.user_metadata?.avatar_url || `https://api.dicebear.com/9.x/avataaars/svg?seed=${user.email}&backgroundColor=c0aede,d1d4f9,ffdfbf,ffd5dc`;
+  const avatarUrl = user.user_metadata?.avatar_url || `https://api.dicebear.com/9.x/shapes/svg?seed=${user.email}&backgroundColor=c0aede,d1d4f9,ffdfbf,ffd5dc`;
 
   return (
     <>

@@ -122,12 +122,12 @@ export default function AIOraclePage() {
               <button
                 type="submit"
                 disabled={loading || !query.trim()}
-                className="m-2 px-6 py-3 rounded-xl bg-gradient-to-r from-accent to-[#E0B85C] text-black font-bold text-sm disabled:opacity-30 shadow-[0_0_15px_rgba(212,168,67,0.3)] hover:shadow-[0_0_25px_rgba(212,168,67,0.6)] hover:scale-105 transition-all duration-300 flex items-center gap-2"
+                className="m-2 px-6 py-3 rounded-xl bg-white text-black font-semibold text-sm disabled:opacity-30 hover:bg-gray-100 transition-colors flex items-center gap-2"
               >
                 {loading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="w-4 h-4 text-black animate-spin" />
                 ) : (
-                  <><Zap className="w-4 h-4" /> Ask</>
+                  <>Ask <ArrowRight className="w-4 h-4 ml-1" /></>
                 )}
               </button>
             </div>

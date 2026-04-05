@@ -382,10 +382,9 @@ export default function HomePage() {
                     &ldquo;A cozy rainy Sunday film that&apos;ll gently ruin me emotionally&rdquo; — yeah, we got you.
                   </p>
                 </div>
-                <div className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-accent to-[#E0B85C] text-black font-bold rounded-xl shadow-[0_0_20px_rgba(212,168,67,0.4)] group-hover:shadow-[0_0_35px_rgba(212,168,67,0.6)] transition-all duration-500 hover:scale-[1.03]">
-                  <Sparkles className="w-5 h-5 fill-current" />
+                <div className="flex items-center gap-2 px-8 py-4 bg-white text-black font-semibold rounded-xl border border-white/20 hover:bg-gray-100 transition-all duration-300">
                   Try AI Oracle
-                  <ArrowRight className="w-5 h-5 ml-1" />
+                  <ArrowRight className="w-4 h-4 ml-1" />
                 </div>
               </div>
             </div>
