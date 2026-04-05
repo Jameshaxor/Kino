@@ -52,8 +52,8 @@ export default function MovieCard({ movie, index = 0, size = "default" }: MovieC
           <div className="absolute inset-0 rounded-xl border border-border/50 group-hover:border-accent/20 transition-colors duration-500 z-30 pointer-events-none" />
 
           {/* Premium Glint Sheen */}
-          <div className="absolute inset-0 z-20 pointer-events-none overflow-hidden rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div className="absolute top-0 left-[-150%] w-[100%] h-[200%] bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-[-25deg] transition-all duration-[800ms] group-hover:translate-x-[350%] group-hover:translate-y-[-20%]" />
+          <div className="absolute inset-0 z-20 pointer-events-none overflow-hidden rounded-xl opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-300">
+            <div className="absolute top-0 left-[-150%] w-[100%] h-[200%] bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-[-25deg] transition-all duration-[800ms] group-hover:translate-x-[350%] group-hover:translate-y-[-20%] group-active:translate-x-[-50%] group-active:translate-y-[0%] group-active:transition-none" />
           </div>
 
           {movie.poster_path ? (
@@ -61,7 +61,7 @@ export default function MovieCard({ movie, index = 0, size = "default" }: MovieC
               src={img(movie.poster_path, "w500")}
               alt={displayTitle || ""}
               fill
-              className="object-cover transition-transform duration-700 md:group-hover:scale-110"
+              className="object-cover transition-transform duration-700 group-hover:scale-110 group-active:scale-[1.12]"
               sizes={size === "large" ? "(max-width: 768px) 50vw, 240px" : "(max-width: 768px) 40vw, 185px"}
             />
           ) : (
