@@ -1,22 +1,22 @@
 @import "tailwindcss";
 
 @theme {
-  /* ===== GOLDEN CINEMA PALETTE ===== */
-  --color-bg-primary: #060608;
-  --color-bg-elevated: #0E0E12;
-  --color-bg-surface: #16161B;
-  --color-bg-hover: #1E1E24;
-  --color-border: #25252B;
-  --color-border-light: #35353D;
+  /* ===== MIDNIGHT INDIGO PALETTE ===== */
+  --color-bg-primary: #05050A;
+  --color-bg-elevated: #0B0B14;
+  --color-bg-surface: #12121E;
+  --color-bg-hover: #1A1A2A;
+  --color-border: #222238;
+  --color-border-light: #323250;
 
-  --color-text-primary: #F5F0E8;
-  --color-text-secondary: #A09B93;
-  --color-text-tertiary: #5C5955;
+  --color-text-primary: #F0F2FF;
+  --color-text-secondary: #A6ADCE;
+  --color-text-tertiary: #697097;
 
-  --color-accent: #D4A843;
-  --color-accent-hover: #E8BF5A;
-  --color-accent-muted: rgba(212, 168, 67, 0.08);
-  --color-accent-glow: rgba(212, 168, 67, 0.25);
+  --color-accent: #8B5CF6;
+  --color-accent-hover: #A78BFA;
+  --color-accent-muted: rgba(139, 92, 246, 0.08);
+  --color-accent-glow: rgba(139, 92, 246, 0.25);
 
   --color-rating-high: #4DB87E;
   --color-rating-mid: #D4A843;
@@ -30,9 +30,9 @@
 
   /* ===== SHADOWS ===== */
   --shadow-card: 0 2px 16px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.03);
-  --shadow-card-hover: 0 12px 48px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(212, 168, 67, 0.1);
-  --shadow-gold: 0 4px 30px rgba(212, 168, 67, 0.2);
-  --shadow-gold-lg: 0 8px 50px rgba(212, 168, 67, 0.3);
+  --shadow-card-hover: 0 12px 48px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(139, 92, 246, 0.1);
+  --shadow-gold: 0 4px 30px rgba(139, 92, 246, 0.2);
+  --shadow-gold-lg: 0 8px 50px rgba(139, 92, 246, 0.3);
   --shadow-overlay: 0 24px 80px rgba(0, 0, 0, 0.9);
 
   /* ===== ANIMATIONS ===== */
@@ -64,8 +64,8 @@
     min-height: 100vh;
     /* Ambient background glow */
     background-image:
-      radial-gradient(ellipse 80% 60% at 50% -20%, rgba(212, 168, 67, 0.04) 0%, transparent 60%),
-      radial-gradient(circle at 20% 80%, rgba(212, 168, 67, 0.02) 0%, transparent 40%);
+      radial-gradient(ellipse 80% 60% at 50% -20%, rgba(139, 92, 246, 0.04) 0%, transparent 60%),
+      radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.02) 0%, transparent 40%);
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -76,7 +76,7 @@
   }
 
   ::selection {
-    background-color: rgba(212, 168, 67, 0.3);
+    background-color: rgba(139, 92, 246, 0.3);
     color: var(--color-text-primary);
   }
 
@@ -108,8 +108,8 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.75rem 1.75rem;
-    background: linear-gradient(135deg, #D4A843 0%, #C49530 100%);
-    color: #060608;
+    background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+    color: #FFFFFF;
     font-weight: 700;
     font-size: 0.875rem;
     letter-spacing: 0.03em;
@@ -154,7 +154,7 @@
   }
   .btn-ghost:hover {
     border-color: var(--color-accent);
-    background: rgba(212, 168, 67, 0.06);
+    background: rgba(139, 92, 246, 0.06);
     color: var(--color-accent);
   }
 
@@ -180,7 +180,7 @@
     inset: 0;
     border-radius: inherit;
     padding: 1px;
-    background: linear-gradient(135deg, transparent 40%, rgba(212,168,67,0.15) 50%, transparent 60%);
+    background: linear-gradient(135deg, transparent 40%, rgba(139, 92, 246, 0.15) 50%, transparent 60%);
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
@@ -189,7 +189,7 @@
     transition: opacity 0.5s ease;
   }
   .card-premium:hover {
-    border-color: rgba(212, 168, 67, 0.2);
+    border-color: rgba(139, 92, 246, 0.2);
     box-shadow: var(--shadow-card-hover);
     transform: translateY(-4px);
   }
@@ -200,7 +200,7 @@
     width: 6px; height: 6px;
     border-radius: 50%;
     background: var(--color-accent);
-    box-shadow: 0 0 12px var(--color-accent), 0 0 40px rgba(212,168,67,0.3);
+    box-shadow: 0 0 12px var(--color-accent), 0 0 40px rgba(139, 92, 246, 0.3);
     animation: pulse-soft 3s ease-in-out infinite;
   }
 
@@ -229,10 +229,54 @@
 
   /* Gradient text */
   .text-gradient-gold {
-    background: linear-gradient(135deg, #D4A843 0%, #F0D78C 50%, #D4A843 100%);
+    background: linear-gradient(135deg, #8B5CF6 0%, #C4B5FD 50%, #8B5CF6 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
+  }
+}
+
+/* ===== MOBILE PERFORMANCE ===== */
+@media (max-width: 768px) {
+  /* Kill the film grain overlay — huge GPU saver on mobile */
+  .film-grain {
+    display: none !important;
+  }
+
+  /* Reduce blur on ghost buttons (saves compositing) */
+  .btn-ghost {
+    backdrop-filter: none;
+  }
+
+  /* Simplify card hover transforms on touch devices */
+  .card-premium:hover {
+    transform: none;
+  }
+
+  /* Remove backdrop-blur from overlays on mobile */
+  .mobile-no-blur {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+/* GPU compositing hints for animated elements */
+.card-premium,
+.hero-image {
+  will-change: transform;
+}
+
+/* ===== REDUCED MOTION SUPPORT ===== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .film-grain {
+    display: none !important;
   }
 }
 
@@ -273,8 +317,8 @@
 }
 
 @keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 20px rgba(212,168,67,0.1); }
-  50% { box-shadow: 0 0 40px rgba(212,168,67,0.25); }
+  0%, 100% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.1); }
+  50% { box-shadow: 0 0 40px rgba(139, 92, 246, 0.25); }
 }
 
 @keyframes gradient-shift {

@@ -37,7 +37,8 @@ export default function MovieCard({ movie, index = 0, size = "default" }: MovieC
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.4, delay: index * 0.04, ease: [0.16, 1, 0.3, 1] }}
       className={`group relative flex flex-col gap-3 snap-start ${
         size === "large" ? "min-w-[200px] md:min-w-[240px]" : "min-w-[150px] md:min-w-[185px]"
@@ -63,7 +64,7 @@ export default function MovieCard({ movie, index = 0, size = "default" }: MovieC
           )}
 
           {/* Hover overlay with actions */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 z-10 flex flex-col justify-end p-3.5">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 z-10 flex flex-col justify-end p-3.5 mobile-no-blur">
             <div className="flex gap-2 transform translate-y-3 group-hover:translate-y-0 transition-transform duration-300 delay-75">
               <button
                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWatchlist(movie as any); }}
@@ -88,7 +89,7 @@ export default function MovieCard({ movie, index = 0, size = "default" }: MovieC
 
           {/* Rating badge */}
           {movie.vote_average > 0 && (
-            <div className="absolute top-2.5 right-2.5 flex items-center gap-1 px-2 py-1 rounded-md bg-black/60 backdrop-blur-md border border-white/5 z-20">
+            <div className="absolute top-2.5 right-2.5 flex items-center gap-1 px-2 py-1 rounded-md bg-black/70 border border-white/5 z-20">
               <Star className={`w-3 h-3 fill-current ${ratingColor}`} />
               <span className={`text-[11px] font-mono font-bold ${ratingColor}`}>
                 {movie.vote_average.toFixed(1)}

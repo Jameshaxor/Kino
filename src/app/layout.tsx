@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Space_Grotesk, Cinzel, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import ClientShell from "@/components/layout/ClientShell";
+import FilmGrain from "@/components/ui/FilmGrain";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -43,7 +44,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${spaceGrotesk.variable} ${cinzel.variable} ${jetbrains.variable}`}>
       <body className="min-h-screen flex flex-col">
-        <div className="film-grain" />
+        <FilmGrain />
         <ClientShell>{children}</ClientShell>
       </body>
     </html>

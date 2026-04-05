@@ -9,6 +9,7 @@ import { Star, Clock, Calendar, Play, Bookmark, Heart, ExternalLink, Sparkles, C
 import { img, GENRE_MAP } from "@/lib/tmdb";
 import MovieCard from "@/components/ui/MovieCard";
 import Carousel from "@/components/ui/Carousel";
+import WatchProviders from "@/components/ui/WatchProviders";
 import { DetailSkeleton } from "@/components/ui/Skeleton";
 import { useWatchlist } from "@/context/WatchlistContext";
 
@@ -20,6 +21,7 @@ export default function MovieDetailPage() {
   const [credits, setCredits] = useState<any>(null);
   const [videos, setVideos] = useState<any>(null);
   const [similar, setSimilar] = useState<any[]>([]);
+  const [watchProviders, setWatchProviders] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showInsights, setShowInsights] = useState(false);
   const [insights, setInsights] = useState<any>(null);
@@ -31,24 +33,29 @@ export default function MovieDetailPage() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [movieRes, creditsRes, videosRes, similarRes] = await Promise.all([
+        const [movieRes, creditsRes, videosRes, similarRes, providersRes] = await Promise.all([
           fetch(`/api/tmdb/movie/${movieId}`),
           fetch(`/api/tmdb/movie/${movieId}/credits`),
           fetch(`/api/tmdb/movie/${movieId}/videos`),
           fetch(`/api/tmdb/movie/${movieId}/similar`),
+          fetch(`/api/tmdb/movie/${movieId}/watch/providers`),
         ]);
 
-        const [m, c, v, s] = await Promise.all([
+        const [m, c, v, s, wp] = await Promise.all([
           movieRes.json(),
           creditsRes.json(),
           videosRes.json(),
           similarRes.json(),
+          providersRes.json(),
         ]);
 
         setMovie(m);
         setCredits(c);
         setVideos(v);
         setSimilar(s.results || []);
+        // Extract US watch providers (default region)
+        const usProviders = wp?.results?.US || null;
+        setWatchProviders(usProviders);
       } catch (error) {
         console.error("Failed to fetch movie:", error);
       } finally {
@@ -180,7 +187,7 @@ export default function MovieDetailPage() {
                 <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-bg-elevated border border-border font-mono text-sm font-bold ${ratingColor}`}>
                   <Star className="w-3.5 h-3.5 fill-current" />
                   {movie.vote_average.toFixed(1)}
-                  <span className="text-text-tertiary font-normal text-xs ml-1">({movie.vote_count?.toLocaleString()})</span>
+                  <span className="text-text-tertiary font-normal text-xs ml-1">({movie.vote_count?.toLocaleString()} TMDB votes)</span>
                 </div>
               )}
               {movie.runtime > 0 && (
@@ -257,6 +264,11 @@ export default function MovieDetailPage() {
             </div>
           </motion.div>
         </div>
+
+        {/* ===== WHERE TO WATCH ===== */}
+        <section className="mt-12">
+          <WatchProviders providers={watchProviders} />
+        </section>
 
         {/* ===== CAST ===== */}
         {cast.length > 0 && (

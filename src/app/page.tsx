@@ -33,11 +33,16 @@ export default function HomePage() {
   useEffect(() => {
     const fetchAll = async () => {
       try {
+        const today = new Date();
+        const futureDate = new Date(today);
+        futureDate.setDate(today.getDate() + 1);
+        const dateStr = futureDate.toISOString().split('T')[0];
+
         const [trendingRes, topRatedRes, nowPlayingRes, upcomingRes] = await Promise.all([
           fetch("/api/tmdb/trending/movie/week"),
           fetch("/api/tmdb/movie/top_rated"),
           fetch("/api/tmdb/movie/now_playing"),
-          fetch("/api/tmdb/movie/upcoming"),
+          fetch(`/api/tmdb/discover/movie?primary_release_date.gte=${dateStr}&sort_by=popularity.desc`),
         ]);
         const [t, tr, np, u] = await Promise.all([
           trendingRes.json(), topRatedRes.json(), nowPlayingRes.json(), upcomingRes.json(),
@@ -69,7 +74,7 @@ export default function HomePage() {
     <div className="flex flex-col">
       {/* ═══════════ CINEMATIC HERO ═══════════ */}
       {hero ? (
-        <section className="relative w-full h-[92vh] min-h-[650px] flex items-end overflow-hidden">
+        <section className="relative w-full h-[75vh] md:h-[92vh] min-h-[500px] md:min-h-[650px] flex items-end overflow-hidden">
           {/* Ken Burns animated backdrop */}
           <AnimatePresence mode="wait">
             <motion.div
@@ -81,7 +86,7 @@ export default function HomePage() {
               className="absolute inset-0"
             >
               {hero.backdrop_path && (
-                <div className="absolute inset-0 animate-[ken-burns_20s_ease-in-out_infinite_alternate]">
+                <div className="absolute inset-0 hero-image animate-[ken-burns_20s_ease-in-out_infinite_alternate] md:animate-[ken-burns_20s_ease-in-out_infinite_alternate]">
                   <Image
                     src={img(hero.backdrop_path, "original")}
                     alt=""
@@ -226,7 +231,7 @@ export default function HomePage() {
           )}
         </section>
       ) : loading ? (
-        <div className="w-full h-[92vh] bg-bg-primary" />
+        <div className="w-full h-[75vh] md:h-[92vh] bg-bg-primary" />
       ) : null}
 
       {/* ═══════════ DISCOVERY FEED ═══════════ */}

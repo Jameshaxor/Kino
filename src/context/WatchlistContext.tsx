@@ -1,8 +1,10 @@
 "use client";
 
-import { createContext, useContext, useCallback, ReactNode } from "react";
+import { createContext, useContext, useCallback, ReactNode, useState, useEffect } from "react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { TMDBMovie } from "@/lib/tmdb";
+import { supabase } from "@/lib/supabase";
+import { User } from "@supabase/supabase-js";
 
 type StoredMovie = {
   id: number;
@@ -14,6 +16,7 @@ type StoredMovie = {
 };
 
 interface WatchlistContextType {
+  user: User | null;
   watchlist: StoredMovie[];
   favorites: StoredMovie[];
   addToWatchlist: (movie: TMDBMovie) => void;
@@ -34,67 +37,126 @@ function movieToStored(movie: TMDBMovie): StoredMovie {
     title: movie.title,
     poster_path: movie.poster_path,
     vote_average: movie.vote_average,
-    release_date: movie.release_date,
+    release_date: movie.release_date || "",
     addedAt: Date.now(),
   };
 }
 
 export function WatchlistProvider({ children }: { children: ReactNode }) {
-  const [watchlist, setWatchlist] = useLocalStorage<StoredMovie[]>("kino-watchlist", []);
-  const [favorites, setFavorites] = useLocalStorage<StoredMovie[]>("kino-favorites", []);
+  const [localWatchlist, setLocalWatchlist] = useLocalStorage<StoredMovie[]>("kino-watchlist", []);
+  const [localFavorites, setLocalFavorites] = useLocalStorage<StoredMovie[]>("kino-favorites", []);
+  
+  const [cloudWatchlist, setCloudWatchlist] = useState<StoredMovie[]>([]);
+  const [cloudFavorites, setCloudFavorites] = useState<StoredMovie[]>([]);
+  
+  const [user, setUser] = useState<User | null>(null);
 
-  const isInWatchlist = useCallback((id: number) => watchlist.some((m) => m.id === id), [watchlist]);
-  const isInFavorites = useCallback((id: number) => favorites.some((m) => m.id === id), [favorites]);
+  useEffect(() => {
+    // Check active session
+    supabase.auth.getSession().then(({ data: { session } }) => setUser(session?.user ?? null));
+    
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    
+    return () => subscription.unsubscribe();
+  }, []);
 
-  const addToWatchlist = useCallback(
-    (movie: TMDBMovie) => {
-      if (!isInWatchlist(movie.id)) {
-        setWatchlist((prev) => [movieToStored(movie), ...prev]);
+  useEffect(() => {
+    if (user) {
+      const fetchCloudData = async () => {
+        const { data: wlData } = await supabase.from('watchlist').select('*').eq('user_id', user.id).order('added_at', { ascending: false });
+        const { data: favData } = await supabase.from('favorites').select('*').eq('user_id', user.id).order('added_at', { ascending: false });
+        
+        if (wlData) setCloudWatchlist(wlData.map(d => ({ ...d, id: d.movie_id })));
+        if (favData) setCloudFavorites(favData.map(d => ({ ...d, id: d.movie_id })));
       }
-    },
-    [isInWatchlist, setWatchlist]
-  );
+      fetchCloudData();
+    } else {
+      setCloudWatchlist([]);
+      setCloudFavorites([]);
+    }
+  }, [user]);
 
-  const removeFromWatchlist = useCallback(
-    (id: number) => setWatchlist((prev) => prev.filter((m) => m.id !== id)),
-    [setWatchlist]
-  );
+  const activeWatchlist = user ? cloudWatchlist : localWatchlist;
+  const activeFavorites = user ? cloudFavorites : localFavorites;
 
-  const addToFavorites = useCallback(
-    (movie: TMDBMovie) => {
-      if (!isInFavorites(movie.id)) {
-        setFavorites((prev) => [movieToStored(movie), ...prev]);
-      }
-    },
-    [isInFavorites, setFavorites]
-  );
+  const isInWatchlist = useCallback((id: number) => activeWatchlist.some((m) => m.id === id), [activeWatchlist]);
+  const isInFavorites = useCallback((id: number) => activeFavorites.some((m) => m.id === id), [activeFavorites]);
 
-  const removeFromFavorites = useCallback(
-    (id: number) => setFavorites((prev) => prev.filter((m) => m.id !== id)),
-    [setFavorites]
-  );
+  const addToWatchlist = useCallback(async (movie: TMDBMovie) => {
+    if (isInWatchlist(movie.id)) return;
+    const stored = movieToStored(movie);
 
-  const toggleWatchlist = useCallback(
-    (movie: TMDBMovie) => {
-      if (isInWatchlist(movie.id)) removeFromWatchlist(movie.id);
-      else addToWatchlist(movie);
-    },
-    [isInWatchlist, removeFromWatchlist, addToWatchlist]
-  );
+    if (user) {
+      setCloudWatchlist(prev => [stored, ...prev]);
+      await supabase.from('watchlist').insert({
+        user_id: user.id,
+        movie_id: movie.id,
+        title: movie.title,
+        poster_path: movie.poster_path,
+        vote_average: movie.vote_average,
+        release_date: movie.release_date
+      });
+    } else {
+      setLocalWatchlist(prev => [stored, ...prev]);
+    }
+  }, [user, isInWatchlist, setLocalWatchlist]);
 
-  const toggleFavorites = useCallback(
-    (movie: TMDBMovie) => {
-      if (isInFavorites(movie.id)) removeFromFavorites(movie.id);
-      else addToFavorites(movie);
-    },
-    [isInFavorites, removeFromFavorites, addToFavorites]
-  );
+  const removeFromWatchlist = useCallback(async (id: number) => {
+    if (user) {
+      setCloudWatchlist(prev => prev.filter(m => m.id !== id));
+      await supabase.from('watchlist').delete().match({ user_id: user.id, movie_id: id });
+    } else {
+      setLocalWatchlist(prev => prev.filter(m => m.id !== id));
+    }
+  }, [user, setLocalWatchlist]);
+
+  const addToFavorites = useCallback(async (movie: TMDBMovie) => {
+    if (isInFavorites(movie.id)) return;
+    const stored = movieToStored(movie);
+
+    if (user) {
+      setCloudFavorites(prev => [stored, ...prev]);
+      await supabase.from('favorites').insert({
+        user_id: user.id,
+        movie_id: movie.id,
+        title: movie.title,
+        poster_path: movie.poster_path,
+        vote_average: movie.vote_average,
+        release_date: movie.release_date
+      });
+    } else {
+      setLocalFavorites(prev => [stored, ...prev]);
+    }
+  }, [user, isInFavorites, setLocalFavorites]);
+
+  const removeFromFavorites = useCallback(async (id: number) => {
+    if (user) {
+      setCloudFavorites(prev => prev.filter(m => m.id !== id));
+      await supabase.from('favorites').delete().match({ user_id: user.id, movie_id: id });
+    } else {
+      setLocalFavorites(prev => prev.filter(m => m.id !== id));
+    }
+  }, [user, setLocalFavorites]);
+
+  const toggleWatchlist = useCallback((movie: TMDBMovie) => {
+    if (isInWatchlist(movie.id)) removeFromWatchlist(movie.id);
+    else addToWatchlist(movie);
+  }, [isInWatchlist, removeFromWatchlist, addToWatchlist]);
+
+  const toggleFavorites = useCallback((movie: TMDBMovie) => {
+    if (isInFavorites(movie.id)) removeFromFavorites(movie.id);
+    else addToFavorites(movie);
+  }, [isInFavorites, removeFromFavorites, addToFavorites]);
 
   return (
     <WatchlistContext.Provider
       value={{
-        watchlist,
-        favorites,
+        user,
+        watchlist: activeWatchlist,
+        favorites: activeFavorites,
         addToWatchlist,
         removeFromWatchlist,
         isInWatchlist,
