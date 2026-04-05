@@ -166,7 +166,7 @@ export default function ShareButton({ type, items, title, subtitle }: ShareButto
       // 5. Draw Footer URL
       ctx.fillStyle = "#a3a3a3";
       ctx.font = "24px 'Helvetica Neue', Helvetica, sans-serif";
-      ctx.fillText("kinodiscovery.com", 80, height - 60);
+      ctx.fillText("kinocinema.vercel.app", 80, height - 60);
 
       // Get Data URL
       return canvas.toDataURL("image/png");

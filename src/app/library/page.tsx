@@ -369,11 +369,13 @@ export default function LibraryPage() {
           </div>
         ) : (
           <div className="flex flex-col">
-            {/* Taste Profile Stats */}
-            <TasteProfile watchlist={watchlist} favorites={favorites} />
-
-            {/* AI Personalized Picks */}
-            <PersonalizedPicks favorites={favorites} />
+            {/* AI Features & Stats (Require Auth) */}
+            {user && (
+              <>
+                <TasteProfile watchlist={watchlist} favorites={favorites} />
+                <PersonalizedPicks favorites={favorites} />
+              </>
+            )}
 
             {/* Favorites Section */}
             {favorites.length > 0 && (

@@ -95,15 +95,17 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
 
     if (user) {
       setCloudWatchlist(prev => [stored, ...prev]);
-      await supabase.from('watchlist').insert({
+      const { error } = await supabase.from('watchlist').insert({
         user_id: user.id,
         movie_id: stored.id,
         title: stored.title,
         poster_path: stored.poster_path,
         vote_average: stored.vote_average,
         release_date: stored.release_date,
-        media_type: stored.media_type
+        media_type: stored.media_type,
+        genre_ids: stored.genre_ids || []
       });
+      if (error) console.error("Supabase watchlist sync error:", error);
     } else {
       setLocalWatchlist(prev => [stored, ...prev]);
     }
@@ -124,15 +126,17 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
 
     if (user) {
       setCloudFavorites(prev => [stored, ...prev]);
-      await supabase.from('favorites').insert({
+      const { error } = await supabase.from('favorites').insert({
         user_id: user.id,
         movie_id: stored.id,
         title: stored.title,
         poster_path: stored.poster_path,
         vote_average: stored.vote_average,
         release_date: stored.release_date,
-        media_type: stored.media_type
+        media_type: stored.media_type,
+        genre_ids: stored.genre_ids || []
       });
+      if (error) console.error("Supabase favorites sync error:", error);
     } else {
       setLocalFavorites(prev => [stored, ...prev]);
     }
