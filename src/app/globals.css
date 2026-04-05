@@ -24,9 +24,9 @@
   --color-error: #E54D4D;
 
   /* ===== FONTS ===== */
-  --font-display: var(--font-cinzel), "Cinzel", "Times New Roman", serif;
-  --font-body: var(--font-space-grotesk), "Space Grotesk", system-ui, sans-serif;
-  --font-mono: var(--font-jetbrains), "JetBrains Mono", monospace;
+  --font-display: var(--font-geist), "Geist", system-ui, sans-serif;
+  --font-body: var(--font-geist), "Geist", system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), "Geist Mono", monospace;
 
   /* ===== SHADOWS ===== */
   --shadow-card: 0 2px 16px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.03);

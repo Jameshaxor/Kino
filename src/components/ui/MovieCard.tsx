@@ -49,7 +49,12 @@ export default function MovieCard({ movie, index = 0, size = "default" }: MovieC
       <Link href={targetRoute} className="block">
         <div className="relative overflow-hidden rounded-xl bg-bg-elevated shadow-card transition-all duration-500 group-hover:shadow-card-hover md:group-hover:-translate-y-2 aspect-[2/3]">
           {/* Gradient border on hover */}
-          <div className="absolute inset-0 rounded-xl border border-border/50 group-hover:border-accent/20 transition-colors duration-500 z-20 pointer-events-none" />
+          <div className="absolute inset-0 rounded-xl border border-border/50 group-hover:border-accent/20 transition-colors duration-500 z-30 pointer-events-none" />
+
+          {/* Premium Glint Sheen */}
+          <div className="absolute inset-0 z-20 pointer-events-none overflow-hidden rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="absolute top-0 left-[-150%] w-[100%] h-[200%] bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-[-25deg] transition-all duration-[800ms] group-hover:translate-x-[350%] group-hover:translate-y-[-20%]" />
+          </div>
 
           {movie.poster_path ? (
             <Image

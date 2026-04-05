@@ -33,6 +33,16 @@ export default function ClientShell({ children }: { children: React.ReactNode })
   const openSearch = useCallback(() => setSearchOpen(true), []);
   const closeSearch = useCallback(() => setSearchOpen(false), []);
 
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/sw.js").catch((err) => {
+          console.error("Service worker registration failed", err);
+        });
+      });
+    }
+  }, []);
+
   return (
     <WatchlistProvider>
       <Navbar onOpenSearch={openSearch} />

@@ -108,7 +108,19 @@ export default function MovieDetailPage() {
   const ratingColor = movie.vote_average >= 7 ? "text-rating-high" : movie.vote_average >= 5 ? "text-rating-mid" : "text-rating-low";
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col relative min-h-screen">
+      {/* ===== AMBIENT COLOR BLEED ===== */}
+      {movie.poster_path && (
+        <div className="absolute top-0 left-0 w-full h-[120vh] pointer-events-none overflow-hidden -z-10 opacity-[0.12] mix-blend-screen">
+          <Image
+            src={img(movie.poster_path, "w500")}
+            alt=""
+            fill
+            className="object-cover blur-[120px] scale-150 -translate-y-20 origin-top"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-bg-primary/50 to-bg-primary" />
+        </div>
+      )}
       {/* ===== CINEMATIC HERO ===== */}
       <section className="relative w-full h-[50vh] md:h-[60vh] min-h-[400px] flex items-end">
         <div className="absolute inset-0 bg-bg-primary overflow-hidden">

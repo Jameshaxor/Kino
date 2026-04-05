@@ -105,21 +105,21 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm"
+            transition={{ duration: 0.25 }}
+            className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-xl"
             onClick={onClose}
           />
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.98, y: -10 }}
+            initial={{ opacity: 0, scale: 0.95, y: -20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.98, y: -10 }}
-            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed top-[15%] left-1/2 -translate-x-1/2 z-[101] w-full max-w-xl"
+            exit={{ opacity: 0, scale: 0.95, y: -20 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed top-[12%] md:top-[15%] left-1/2 -translate-x-1/2 z-[101] w-full max-w-2xl px-4"
           >
-            <div className="mx-4 bg-bg-elevated border border-border rounded-xl shadow-overlay overflow-hidden">
-              <div className="flex items-center gap-3 px-4 border-b border-border">
-                <Search className="w-4 h-4 text-text-tertiary flex-shrink-0" />
+            <div className="bg-black/60 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-[0_0_80px_rgba(139,92,246,0.15)] overflow-hidden">
+              <div className="flex items-center gap-4 px-5 border-b border-white/10">
+                <Search className="w-5 h-5 text-accent flex-shrink-0" />
                 <input
                   ref={inputRef}
                   type="text"
@@ -129,15 +129,15 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                     setSelectedIndex(0);
                   }}
                   placeholder="Search movies, TV shows, anime..."
-                  className="flex-1 py-4 bg-transparent text-text-primary placeholder:text-text-tertiary text-sm focus:outline-none"
+                  className="flex-1 py-5 md:py-6 bg-transparent text-white placeholder:text-white/30 text-lg md:text-xl font-display tracking-tight focus:outline-none"
                 />
-                {loading && <Loader2 className="w-4 h-4 text-text-tertiary animate-spin" />}
-                <button onClick={onClose} className="p-1.5 rounded text-text-tertiary hover:text-text-secondary transition-colors">
-                  <X className="w-4 h-4" />
+                {loading && <Loader2 className="w-5 h-5 text-accent/50 animate-spin" />}
+                <button onClick={onClose} className="p-2 rounded-lg bg-white/5 text-white/50 hover:text-white hover:bg-white/10 transition-colors">
+                  <X className="w-4 h-4 md:w-5 md:h-5" />
                 </button>
               </div>
 
-              <div className="max-h-[400px] overflow-y-auto">
+              <div className="max-h-[50vh] overflow-y-auto">
                 {results.length > 0 ? (
                   <div className="p-2">
                     {results.map((result, i) => {
