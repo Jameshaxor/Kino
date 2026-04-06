@@ -13,14 +13,24 @@ export default function AuthGreeting() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN" && session?.user) {
-        const username = session.user.user_metadata?.full_name || session.user.email?.split("@")[0] || "there";
-        setGreeting(`Welcome to KINO, ${username}.`);
-        
-        // Auto-dismiss after 5 seconds
-        clearTimeout(timeout);
-        timeout = setTimeout(() => {
-          setGreeting(null);
-        }, 5000);
+        // Prevent showing the greeting multiple times if the browser suspends/resumes or token refreshes
+        const hasGreeted = sessionStorage.getItem("kino_has_greeted");
+        if (!hasGreeted) {
+          const username = session.user.user_metadata?.full_name || session.user.email?.split("@")[0] || "there";
+          setGreeting(`Welcome to KINO, ${username}.`);
+          sessionStorage.setItem("kino_has_greeted", "true");
+          
+          // Auto-dismiss after 5 seconds
+          clearTimeout(timeout);
+          timeout = setTimeout(() => {
+            setGreeting(null);
+          }, 5000);
+        }
+      }
+      
+      // If they explicitly sign out, clear the flag so they can be greeted again later
+      if (event === "SIGNED_OUT") {
+        sessionStorage.removeItem("kino_has_greeted");
       }
     });
 
