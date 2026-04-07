@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, Compass, TrendingUp, Sparkles, Bookmark } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 const NAV_ITEMS = [
   { href: "/", label: "Discover", icon: Home },
@@ -32,9 +32,7 @@ export default function MobileBottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`relative flex items-center justify-center transition-all duration-300 ease-out active:scale-95 ${
-                isActive ? "px-4 h-[46px]" : "w-[46px] h-[46px]"
-              }`}
+              className="relative flex items-center justify-center h-[46px] rounded-full transition-transform active:scale-95"
             >
               {/* Active Tab Background */}
               {isActive && (
@@ -45,28 +43,26 @@ export default function MobileBottomNav() {
                 />
               )}
 
-              <div className="relative z-10 flex items-center justify-center gap-2">
+              <div className={`relative z-10 flex items-center justify-center h-full transition-all duration-300 ease-out ${
+                isActive ? "px-4" : "w-[46px]"
+              }`}>
                 <Icon
-                  className={`transition-colors duration-300 ${
+                  className={`flex-shrink-0 transition-colors duration-300 ${
                     isActive ? "w-5 h-5 text-accent" : "w-5 h-5 text-text-tertiary hover:text-text-primary"
                   }`}
                   strokeWidth={isActive ? 2.5 : 2}
                 />
                 
-                {/* Expandable Text Label */}
-                <AnimatePresence mode="popLayout">
-                  {isActive && (
-                    <motion.span
-                      initial={{ opacity: 0, width: 0, x: -10 }}
-                      animate={{ opacity: 1, width: "auto", x: 0 }}
-                      exit={{ opacity: 0, width: 0, x: -10 }}
-                      transition={{ duration: 0.2, ease: "easeInOut" }}
-                      className="text-[11px] font-bold tracking-wide text-accent whitespace-nowrap overflow-hidden"
-                    >
-                      {item.label}
-                    </motion.span>
-                  )}
-                </AnimatePresence>
+                {/* CSS purely fluid expansion */}
+                <div 
+                  className={`overflow-hidden transition-all duration-300 ease-out flex items-center ${
+                    isActive ? "max-w-[80px] ml-1.5 opacity-100" : "max-w-0 opacity-0"
+                  }`}
+                >
+                  <span className="text-[11px] font-bold tracking-wide text-accent whitespace-nowrap pt-[1px]">
+                    {item.label}
+                  </span>
+                </div>
               </div>
             </Link>
           );
