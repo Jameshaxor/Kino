@@ -169,7 +169,7 @@ export default function AIOraclePage() {
               <button
                 type="submit"
                 disabled={loading || !query.trim()}
-                className="flex-shrink-0 m-1.5 md:m-2 px-4 md:px-6 py-2.5 md:py-3 rounded-xl bg-accent text-white font-semibold text-sm disabled:opacity-30 hover:bg-accent-hover transition-colors flex items-center justify-center gap-2"
+                className="flex-shrink-0 m-1.5 md:m-2 px-4 md:px-6 py-2.5 md:py-3 rounded-xl bg-white text-black font-semibold text-sm disabled:opacity-30 hover:bg-gray-100 transition-all duration-300 flex items-center justify-center gap-2"
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Ask <ArrowRight className="w-4 h-4 ml-1" /></>}
               </button>
