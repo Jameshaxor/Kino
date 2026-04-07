@@ -3,7 +3,7 @@
 import { useWatchlist } from "@/context/WatchlistContext";
 import MovieCard from "@/components/ui/MovieCard";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bookmark, Heart, AlertCircle, Compass, Sparkles, Loader2, Star, BarChart3, Zap, Film, Tv } from "lucide-react";
+import { Bookmark, Heart, AlertCircle, Compass, Sparkles, Loader2, Star, BarChart3, Zap, Film, Tv, Clock, CalendarClock } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import AuthModal from "@/components/ui/AuthModal";
@@ -316,6 +316,71 @@ function PersonalizedPicks({ favorites }: { favorites: any[] }) {
     </section>
   );
 }
+// ═══════════════════════════════════════
+// RELEASE RADAR
+// ═══════════════════════════════════════
+
+function ReleaseRadar({ watchlist }: { watchlist: any[] }) {
+  const upcoming = useMemo(() => {
+    const now = new Date();
+    return watchlist
+      .filter((item) => {
+        if (!item.release_date && !item.first_air_date) return false;
+        const date = new Date(item.release_date || item.first_air_date);
+        return date > now;
+      })
+      .sort((a, b) => {
+        const da = new Date(a.release_date || a.first_air_date).getTime();
+        const db = new Date(b.release_date || b.first_air_date).getTime();
+        return da - db;
+      })
+      .slice(0, 4);
+  }, [watchlist]);
+
+  if (upcoming.length === 0) return null;
+
+  return (
+    <section className="mb-16">
+      <div className="flex items-center gap-3 mb-6">
+        <CalendarClock className="w-6 h-6 text-accent" />
+        <h2 className="text-2xl font-display font-medium text-white">Release Radar</h2>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {upcoming.map((item) => {
+          const releaseDate = new Date(item.release_date || item.first_air_date);
+          const daysAway = Math.ceil((releaseDate.getTime() - new Date().getTime()) / (1000 * 3600 * 24));
+          
+          return (
+            <Link
+              key={`radar-${item.id}`}
+              href={`/${item.media_type === "tv" ? "tv" : "movie"}/${item.id}`}
+              className="card-premium flex items-center gap-4 p-4 group"
+            >
+              <div className="w-16 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-bg-surface">
+                {item.poster_path ? (
+                  <Image src={img(item.poster_path, "w200")} alt={item.title || item.name} width={64} height={96} className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-xs text-text-tertiary">No Img</div>
+                )}
+              </div>
+              <div className="flex-1 min-w-0 flex flex-col justify-center">
+                <h3 className="font-display font-semibold text-lg text-text-primary group-hover:text-accent transition-colors truncate">{item.title || item.name}</h3>
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="text-xs font-mono px-2 py-1 bg-accent/10 text-accent border border-accent/20 rounded-md">
+                    {daysAway} day{daysAway !== 1 ? 's' : ''} away
+                  </span>
+                  <span className="text-xs text-text-tertiary">
+                    {releaseDate.toLocaleDateString("en-US", { month: "long", day: "numeric" })}
+                  </span>
+                </div>
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
 
 // ═══════════════════════════════════════
 // MAIN LIBRARY PAGE
@@ -352,20 +417,18 @@ export default function LibraryPage() {
         </header>
 
         {watchlist.length === 0 && favorites.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center bg-bg-surface border border-border rounded-2xl border-dashed">
-            <div className="w-16 h-16 bg-bg-elevated rounded-full flex items-center justify-center mb-4">
-              <Compass className="w-8 h-8 text-text-tertiary" />
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <div className="w-20 h-20 bg-bg-elevated border border-border rounded-2xl flex items-center justify-center mb-6">
+              <Compass className="w-9 h-9 text-text-tertiary" />
             </div>
-            <h2 className="text-2xl font-display font-medium text-white mb-2">Your library is empty</h2>
-            <p className="text-text-secondary max-w-md mb-8">
-              You haven't saved any titles yet. Explore our catalog and click the heart or bookmark icons to start building your collection.
+            <h2 className="text-2xl font-display font-bold text-white mb-3">Your library is empty</h2>
+            <p className="text-text-secondary max-w-md mb-8 leading-relaxed">
+              Bookmark films to watch, heart your favorites, and build your personal cinematic collection.
             </p>
-            <Link 
-              href="/browse"
-              className="px-6 py-3 bg-white text-black font-semibold rounded-lg hover:bg-white/90 transition-colors"
-            >
-              Discover Content
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link href="/browse" className="btn-gold">Explore Films</Link>
+              <Link href="/ai" className="btn-ghost"><Sparkles className="w-4 h-4" /> Ask AI Oracle</Link>
+            </div>
           </div>
         ) : (
           <div className="flex flex-col">
@@ -376,6 +439,9 @@ export default function LibraryPage() {
                 <PersonalizedPicks favorites={favorites} />
               </>
             )}
+
+            {/* Release Radar */}
+            <ReleaseRadar watchlist={watchlist} />
 
             {/* Favorites Section */}
             {favorites.length > 0 && (

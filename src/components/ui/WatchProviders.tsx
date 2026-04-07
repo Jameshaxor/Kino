@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Tv, ShoppingCart, Film, ExternalLink } from "lucide-react";
+import RegionPicker from "@/components/ui/RegionPicker";
+import { useRegion } from "@/context/RegionContext";
 
 interface Provider {
   logo_path: string;
@@ -19,7 +21,7 @@ interface WatchProvidersData {
 }
 
 interface WatchProvidersProps {
-  providers: WatchProvidersData | null;
+  allProviders: Record<string, WatchProvidersData> | null;
 }
 
 const TMDB_IMG = "https://image.tmdb.org/t/p/original";
@@ -79,79 +81,67 @@ function ProviderRow({
   );
 }
 
-export default function WatchProviders({ providers }: WatchProvidersProps) {
-  if (!providers) return null;
+export default function WatchProviders({ allProviders }: WatchProvidersProps) {
+  const { region } = useRegion();
+
+  if (!allProviders) return null;
+
+  const providers = allProviders[region.code] || null;
 
   const hasProviders =
-    (providers.flatrate && providers.flatrate.length > 0) ||
-    (providers.rent && providers.rent.length > 0) ||
-    (providers.buy && providers.buy.length > 0);
-
-  if (!hasProviders) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="p-5 bg-bg-elevated rounded-xl border border-border"
-      >
-        <div className="flex items-center gap-3">
-          <Tv className="w-5 h-5 text-text-tertiary" />
-          <div className="flex flex-col gap-0.5">
-            <span className="text-sm text-text-secondary">
-              Not currently available for streaming
-            </span>
-            <span className="text-xs text-text-tertiary">
-              Check back later or visit TMDB for updates
-            </span>
-          </div>
-        </div>
-      </motion.div>
-    );
-  }
+    providers &&
+    ((providers.flatrate && providers.flatrate.length > 0) ||
+      (providers.rent && providers.rent.length > 0) ||
+      (providers.buy && providers.buy.length > 0));
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <div className="section-line" />
-          <h2 className="text-sm font-mono text-accent uppercase tracking-[0.15em]">
-            Where to Watch
-          </h2>
+          <h2 className="text-sm font-mono text-accent uppercase tracking-[0.15em]">Where to Watch</h2>
         </div>
-        {providers.link && (
-          <a
-            href={providers.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-xs text-text-tertiary hover:text-accent transition-colors"
-          >
-            <span>JustWatch</span>
-            <ExternalLink className="w-3 h-3" />
-          </a>
-        )}
+        <div className="flex items-center gap-3">
+          <RegionPicker />
+          {providers?.link && (
+            <a
+              href={providers.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-xs text-text-tertiary hover:text-accent transition-colors"
+            >
+              <span>JustWatch</span>
+              <ExternalLink className="w-3 h-3" />
+            </a>
+          )}
+        </div>
       </div>
 
-      <div className="p-5 md:p-6 bg-bg-elevated rounded-xl border border-border flex flex-col gap-5">
-        <ProviderRow
-          label="Stream"
-          icon={Tv}
-          items={providers.flatrate || []}
-          delay={0}
-        />
-        <ProviderRow
-          label="Rent"
-          icon={Film}
-          items={providers.rent || []}
-          delay={0.1}
-        />
-        <ProviderRow
-          label="Buy"
-          icon={ShoppingCart}
-          items={providers.buy || []}
-          delay={0.2}
-        />
-      </div>
+      {!hasProviders ? (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-5 bg-bg-elevated rounded-xl border border-border"
+        >
+          <div className="flex items-center gap-3">
+            <Tv className="w-5 h-5 text-text-tertiary" />
+            <div className="flex flex-col gap-0.5">
+              <span className="text-sm text-text-secondary">
+                Not available in {region.name}
+              </span>
+              <span className="text-xs text-text-tertiary">
+                Try changing your region above, or check JustWatch for more options.
+              </span>
+            </div>
+          </div>
+        </motion.div>
+      ) : (
+        <div className="p-5 md:p-6 bg-bg-elevated rounded-xl border border-border flex flex-col gap-5">
+          <ProviderRow label="Stream" icon={Tv} items={providers?.flatrate || []} delay={0} />
+          <ProviderRow label="Rent" icon={Film} items={providers?.rent || []} delay={0.1} />
+          <ProviderRow label="Buy" icon={ShoppingCart} items={providers?.buy || []} delay={0.2} />
+        </div>
+      )}
     </div>
   );
 }

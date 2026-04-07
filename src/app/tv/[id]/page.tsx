@@ -21,7 +21,7 @@ export default function TVDetailPage({ params }: { params: Promise<{ id: string 
   const [credits, setCredits] = useState<any>(null);
   const [videos, setVideos] = useState<any>(null);
   const [similar, setSimilar] = useState<any[]>([]);
-  const [watchProviders, setWatchProviders] = useState<any>(null);
+  const [allProviders, setAllProviders] = useState<Record<string, any> | null>(null);
   const [loading, setLoading] = useState(true);
   const [showInsights, setShowInsights] = useState(false);
   const [insights, setInsights] = useState<any>(null);
@@ -59,8 +59,7 @@ export default function TVDetailPage({ params }: { params: Promise<{ id: string 
         const finalSimilar = (s.results || []).map((show: any) => ({ ...show, media_type: "tv" }));
         setSimilar(finalSimilar);
         
-        const usProviders = wp?.results?.US || null;
-        setWatchProviders(usProviders);
+        setAllProviders(wp?.results || null);
       } catch (error) {
         console.error("Failed to fetch tv show:", error);
       } finally {
@@ -292,7 +291,7 @@ export default function TVDetailPage({ params }: { params: Promise<{ id: string 
 
         {/* ===== WHERE TO WATCH ===== */}
         <section className="mt-12">
-          <WatchProviders providers={watchProviders} />
+          <WatchProviders allProviders={allProviders} />
         </section>
 
         {/* ===== CAST ===== */}

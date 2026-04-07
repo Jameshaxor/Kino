@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Star, Clock, Calendar, Play, Bookmark, Heart, ExternalLink, Sparkles, ChevronRight } from "lucide-react";
+import { Star, Clock, Calendar, Play, Bookmark, Heart, Sparkles, ChevronRight, DollarSign, Users } from "lucide-react";
 import { img, GENRE_MAP } from "@/lib/tmdb";
 import MovieCard from "@/components/ui/MovieCard";
 import Carousel from "@/components/ui/Carousel";
@@ -22,7 +22,7 @@ export default function MovieDetailPage() {
   const [credits, setCredits] = useState<any>(null);
   const [videos, setVideos] = useState<any>(null);
   const [similar, setSimilar] = useState<any[]>([]);
-  const [watchProviders, setWatchProviders] = useState<any>(null);
+  const [allProviders, setAllProviders] = useState<Record<string, any> | null>(null);
   const [loading, setLoading] = useState(true);
   const [showInsights, setShowInsights] = useState(false);
   const [insights, setInsights] = useState<any>(null);
@@ -43,20 +43,16 @@ export default function MovieDetailPage() {
         ]);
 
         const [m, c, v, s, wp] = await Promise.all([
-          movieRes.json(),
-          creditsRes.json(),
-          videosRes.json(),
-          similarRes.json(),
-          providersRes.json(),
+          movieRes.json(), creditsRes.json(), videosRes.json(),
+          similarRes.json(), providersRes.json(),
         ]);
 
         setMovie(m);
         setCredits(c);
         setVideos(v);
         setSimilar(s.results || []);
-        // Extract US watch providers (default region)
-        const usProviders = wp?.results?.US || null;
-        setWatchProviders(usProviders);
+        // Pass the full results map so WatchProviders can switch regions client-side
+        setAllProviders(wp?.results || null);
       } catch (error) {
         console.error("Failed to fetch movie:", error);
       } finally {
@@ -69,18 +65,11 @@ export default function MovieDetailPage() {
   const fetchInsights = async () => {
     if (insights || insightsLoading || !movie) return;
     setInsightsLoading(true);
-
-    // Check localStorage cache first
     const cacheKey = `kino-insights-${movieId}`;
     const cached = typeof window !== "undefined" ? localStorage.getItem(cacheKey) : null;
     if (cached) {
-      try {
-        setInsights(JSON.parse(cached));
-        setInsightsLoading(false);
-        return;
-      } catch { /* ignore */ }
+      try { setInsights(JSON.parse(cached)); setInsightsLoading(false); return; } catch { /* ignore */ }
     }
-
     try {
       const res = await fetch("/api/ai/insights", {
         method: "POST",
@@ -92,11 +81,8 @@ export default function MovieDetailPage() {
         setInsights(data);
         localStorage.setItem(cacheKey, JSON.stringify(data));
       }
-    } catch {
-      console.error("Failed to fetch AI insights");
-    } finally {
-      setInsightsLoading(false);
-    }
+    } catch { console.error("Failed to fetch AI insights"); }
+    finally { setInsightsLoading(false); }
   };
 
   if (loading) return <DetailSkeleton />;
@@ -107,91 +93,78 @@ export default function MovieDetailPage() {
   const trailers = videos?.results?.filter((v: any) => v.site === "YouTube" && v.type === "Trailer") || [];
   const ratingColor = movie.vote_average >= 7 ? "text-rating-high" : movie.vote_average >= 5 ? "text-rating-mid" : "text-rating-low";
 
+  const formatMoney = (n: number) => {
+    if (!n || n === 0) return null;
+    if (n >= 1_000_000_000) return `$${(n / 1_000_000_000).toFixed(1)}B`;
+    if (n >= 1_000_000) return `$${Math.round(n / 1_000_000)}M`;
+    return `$${n.toLocaleString()}`;
+  };
+
+  const budget = formatMoney(movie.budget);
+  const revenue = formatMoney(movie.revenue);
+
   return (
     <div className="flex flex-col relative min-h-screen">
-      {/* ===== AMBIENT COLOR BLEED ===== */}
+      {/* Ambient Color Bleed */}
       {movie.poster_path && (
         <div className="absolute top-0 left-0 w-full h-[120vh] pointer-events-none overflow-hidden -z-10 opacity-[0.12] mix-blend-screen">
-          <Image
-            src={img(movie.poster_path, "w500")}
-            alt=""
-            fill
-            className="object-cover blur-[120px] scale-150 -translate-y-20 origin-top"
-          />
+          <Image src={img(movie.poster_path, "w500")} alt="" fill className="object-cover blur-[120px] scale-150 -translate-y-20 origin-top" />
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-bg-primary/50 to-bg-primary" />
         </div>
       )}
-      {/* ===== CINEMATIC HERO ===== */}
+
+      {/* Cinematic Hero */}
       <section className="relative w-full h-[50vh] md:h-[60vh] min-h-[400px] flex items-end">
         <div className="absolute inset-0 bg-bg-primary overflow-hidden">
           {movie.backdrop_path && (
-            <motion.div
-              initial={{ opacity: 0, scale: 1.05 }}
-              animate={{ opacity: 0.4, scale: 1 }}
-              transition={{ duration: 1.2 }}
-              className="absolute inset-0"
-            >
-              <Image
-                src={img(movie.backdrop_path, "original")}
-                alt=""
-                fill
-                className="object-cover"
-                priority
-              />
+            <motion.div initial={{ opacity: 0, scale: 1.05 }} animate={{ opacity: 0.4, scale: 1 }} transition={{ duration: 1.2 }} className="absolute inset-0">
+              <Image src={img(movie.backdrop_path, "original")} alt="" fill className="object-cover" priority />
             </motion.div>
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-bg-primary via-bg-primary/70 to-bg-primary/30" />
           <div className="absolute inset-0 bg-gradient-to-r from-bg-primary/80 via-transparent to-transparent" />
         </div>
+
+        {/* Mobile floating poster — top right of hero */}
+        {movie.poster_path && (
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="absolute top-6 right-4 z-20 md:hidden"
+          >
+            <div className="relative w-[90px] aspect-[2/3] rounded-xl overflow-hidden shadow-card-hover border border-white/10">
+              <Image src={img(movie.poster_path, "w300")} alt={movie.title} fill className="object-cover" />
+            </div>
+          </motion.div>
+        )}
       </section>
 
-      {/* ===== MAIN CONTENT ===== */}
+      {/* Main Content */}
       <div className="max-w-7xl mx-auto w-full px-5 md:px-8 -mt-40 md:-mt-52 relative z-10">
         <div className="flex flex-col md:flex-row gap-8 md:gap-12">
-          {/* Poster */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="hidden md:block w-[260px] lg:w-[300px] flex-shrink-0"
-          >
+
+          {/* Desktop Poster */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="hidden md:block w-[260px] lg:w-[300px] flex-shrink-0">
             <div className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-card bg-bg-elevated border border-border/50">
               {movie.poster_path ? (
-                <Image
-                  src={img(movie.poster_path, "w500")}
-                  alt={movie.title}
-                  fill
-                  className="object-cover"
-                  priority
-                />
+                <Image src={img(movie.poster_path, "w500")} alt={movie.title} fill className="object-cover" priority />
               ) : (
-                <div className="flex h-full items-center justify-center text-text-tertiary font-display italic">
-                  No Poster
-                </div>
+                <div className="flex h-full items-center justify-center text-text-tertiary font-display italic">No Poster</div>
               )}
             </div>
           </motion.div>
 
           {/* Info */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="flex-1 flex flex-col gap-5 pt-4 md:pt-8"
-          >
-            {/* Title */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }} className="flex-1 flex flex-col gap-5 pt-4 md:pt-8">
             <div className="flex flex-col gap-2">
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold text-text-primary tracking-tight leading-tight">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold text-text-primary tracking-tight leading-tight pr-24 md:pr-0">
                 {movie.title}
                 {movie.release_date && (
-                  <span className="text-text-tertiary font-normal text-xl md:text-2xl ml-3">
-                    ({new Date(movie.release_date).getFullYear()})
-                  </span>
+                  <span className="text-text-tertiary font-normal text-xl md:text-2xl ml-3">({new Date(movie.release_date).getFullYear()})</span>
                 )}
               </h1>
-              {movie.tagline && (
-                <p className="text-text-tertiary italic text-base">&ldquo;{movie.tagline}&rdquo;</p>
-              )}
+              {movie.tagline && <p className="text-text-tertiary italic text-base">&ldquo;{movie.tagline}&rdquo;</p>}
             </div>
 
             {/* Meta pills */}
@@ -200,7 +173,7 @@ export default function MovieDetailPage() {
                 <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-bg-elevated border border-border font-mono text-sm font-bold ${ratingColor}`}>
                   <Star className="w-3.5 h-3.5 fill-current" />
                   {movie.vote_average.toFixed(1)}
-                  <span className="text-text-tertiary font-normal text-xs ml-1">({movie.vote_count?.toLocaleString()} TMDB votes)</span>
+                  <span className="text-text-tertiary font-normal text-xs ml-1">({movie.vote_count?.toLocaleString()} votes)</span>
                 </div>
               )}
               {movie.runtime > 0 && (
@@ -221,34 +194,48 @@ export default function MovieDetailPage() {
             {movie.genres?.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {movie.genres.map((g: any) => (
-                  <Link
-                    key={g.id}
-                    href={`/explore/genre/${g.id}`}
-                    className="px-3 py-1.5 text-xs font-medium rounded-md bg-accent-muted text-accent border border-accent/20 hover:border-accent/40 transition-colors"
-                  >
+                  <Link key={g.id} href={`/explore/genre/${g.id}`} className="px-3 py-1.5 text-xs font-medium rounded-md bg-accent-muted text-accent border border-accent/20 hover:border-accent/40 transition-colors">
                     {g.name}
                   </Link>
                 ))}
               </div>
             )}
 
-            {/* Overview */}
-            <p className="text-text-secondary text-base leading-relaxed max-w-3xl">
-              {movie.overview}
-            </p>
+            <p className="text-text-secondary text-base leading-relaxed max-w-3xl">{movie.overview}</p>
 
-            {/* Director */}
             {directors.length > 0 && (
               <div className="flex items-center gap-2 text-sm">
                 <span className="text-text-tertiary">Directed by</span>
                 {directors.map((d: any, i: number) => (
                   <span key={d.id}>
-                    <Link href={`/person/${d.id}`} className="text-text-primary hover:text-accent transition-colors font-medium">
-                      {d.name}
-                    </Link>
+                    <Link href={`/person/${d.id}`} className="text-text-primary hover:text-accent transition-colors font-medium">{d.name}</Link>
                     {i < directors.length - 1 && <span className="text-text-tertiary">, </span>}
                   </span>
                 ))}
+              </div>
+            )}
+
+            {/* Box Office */}
+            {(budget || revenue) && (
+              <div className="flex flex-wrap gap-3">
+                {budget && (
+                  <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-bg-elevated border border-border">
+                    <DollarSign className="w-4 h-4 text-text-tertiary" />
+                    <div className="flex flex-col">
+                      <span className="text-[11px] font-mono text-text-tertiary uppercase tracking-wider">Budget</span>
+                      <span className="text-sm font-bold text-text-primary font-mono">{budget}</span>
+                    </div>
+                  </div>
+                )}
+                {revenue && (
+                  <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-bg-elevated border border-border">
+                    <DollarSign className="w-4 h-4 text-rating-high" />
+                    <div className="flex flex-col">
+                      <span className="text-[11px] font-mono text-text-tertiary uppercase tracking-wider">Box Office</span>
+                      <span className="text-sm font-bold text-rating-high font-mono">{revenue}</span>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -260,43 +247,36 @@ export default function MovieDetailPage() {
                   Play Trailer
                 </a>
               )}
-              <button
-                onClick={() => toggleWatchlist(movie)}
-                className={`btn-ghost ${isInWatchlist(movie.id) ? "border-accent/50 text-accent" : ""}`}
-              >
+              <button onClick={() => toggleWatchlist(movie)} className={`btn-ghost ${isInWatchlist(movie.id) ? "border-accent/50 text-accent" : ""}`}>
                 <Bookmark className="w-4 h-4" fill={isInWatchlist(movie.id) ? "currentColor" : "none"} />
                 {isInWatchlist(movie.id) ? "In Watchlist" : "Watchlist"}
               </button>
-              <button
-                onClick={() => toggleFavorites(movie)}
-                className={`btn-ghost ${isInFavorites(movie.id) ? "border-red-500/50 text-red-400" : ""}`}
-              >
+              <button onClick={() => toggleFavorites(movie)} className={`btn-ghost ${isInFavorites(movie.id) ? "border-red-500/50 text-red-400" : ""}`}>
                 <Heart className="w-4 h-4" fill={isInFavorites(movie.id) ? "currentColor" : "none"} />
                 {isInFavorites(movie.id) ? "Favorited" : "Favorite"}
               </button>
-              <ShareButton
-                type="movie"
-                items={[{ title: movie.title, year: movie.release_date ? parseInt(movie.release_date) : undefined, poster_path: movie.poster_path }]}
-              />
+              <ShareButton type="movie" items={[{ title: movie.title, year: movie.release_date ? parseInt(movie.release_date) : undefined, poster_path: movie.poster_path }]} />
             </div>
           </motion.div>
         </div>
 
-        {/* ===== WHERE TO WATCH ===== */}
+        {/* Where to Watch */}
         <section className="mt-12">
-          <WatchProviders providers={watchProviders} />
+          <WatchProviders allProviders={allProviders} />
         </section>
 
-        {/* ===== CAST ===== */}
+        {/* Cast */}
         {cast.length > 0 && (
           <section className="mt-16">
-            <Carousel title="Top Cast">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl md:text-2xl font-display font-semibold text-text-primary flex items-center gap-2">
+                <Users className="w-5 h-5 text-accent" />
+                Top Cast
+              </h2>
+            </div>
+            <Carousel title="">
               {cast.map((actor: any, i: number) => (
-                <Link
-                  key={actor.id}
-                  href={`/person/${actor.id}`}
-                  className="group flex flex-col gap-2.5 min-w-[120px] md:min-w-[140px] snap-start"
-                >
+                <Link key={actor.id} href={`/person/${actor.id}`} className="group flex flex-col gap-2.5 min-w-[120px] md:min-w-[140px] snap-start">
                   <motion.div
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -304,22 +284,13 @@ export default function MovieDetailPage() {
                     className="relative aspect-[2/3] rounded-lg overflow-hidden bg-bg-elevated border border-border/50 group-hover:border-accent/30 transition-all"
                   >
                     {actor.profile_path ? (
-                      <Image
-                        src={img(actor.profile_path, "w300")}
-                        alt={actor.name}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
+                      <Image src={img(actor.profile_path, "w300")} alt={actor.name} fill className="object-cover transition-transform duration-500 group-hover:scale-105" />
                     ) : (
-                      <div className="flex h-full items-center justify-center text-text-tertiary text-xs text-center p-2 italic">
-                        No Photo
-                      </div>
+                      <div className="flex h-full items-center justify-center text-text-tertiary text-xs text-center p-2 italic">No Photo</div>
                     )}
                   </motion.div>
                   <div className="px-0.5">
-                    <p className="text-sm font-medium text-text-primary truncate group-hover:text-accent transition-colors">
-                      {actor.name}
-                    </p>
+                    <p className="text-sm font-medium text-text-primary truncate group-hover:text-accent transition-colors">{actor.name}</p>
                     <p className="text-xs text-text-tertiary truncate">{actor.character}</p>
                   </div>
                 </Link>
@@ -328,24 +299,20 @@ export default function MovieDetailPage() {
           </section>
         )}
 
-        {/* ===== TRAILERS ===== */}
+        {/* Trailers */}
         {trailers.length > 0 && (
           <section id="trailers" className="mt-16 scroll-mt-24">
-            <h2 className="text-xl md:text-2xl font-display font-semibold text-text-primary mb-6">
-              Trailers & Clips
-            </h2>
+            <h2 className="text-xl md:text-2xl font-display font-semibold text-text-primary mb-6">Trailers &amp; Clips</h2>
             <div className="flex gap-5 overflow-x-auto hide-scrollbar pb-4">
               {trailers.slice(0, 4).map((video: any) => (
                 <div key={video.id} className="min-w-[320px] md:min-w-[480px] flex-shrink-0">
                   <div className="relative aspect-video rounded-lg overflow-hidden bg-bg-elevated border border-border">
                     <iframe
-                      width="100%"
-                      height="100%"
+                      width="100%" height="100%"
                       src={`https://www.youtube.com/embed/${video.key}`}
                       title={video.name}
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      className="border-0"
+                      allowFullScreen className="border-0"
                     />
                   </div>
                   <p className="mt-2 text-sm text-text-secondary truncate">{video.name}</p>
@@ -355,13 +322,10 @@ export default function MovieDetailPage() {
           </section>
         )}
 
-        {/* ===== AI INSIGHTS ===== */}
+        {/* AI Insights */}
         <section className="mt-16">
           <button
-            onClick={() => {
-              setShowInsights(!showInsights);
-              if (!showInsights) fetchInsights();
-            }}
+            onClick={() => { setShowInsights(!showInsights); if (!showInsights) fetchInsights(); }}
             className="flex items-center gap-2.5 text-accent hover:text-accent-hover transition-colors group"
           >
             <Sparkles className="w-5 h-5" />
@@ -370,16 +334,10 @@ export default function MovieDetailPage() {
           </button>
 
           {showInsights && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              transition={{ duration: 0.3 }}
-              className="mt-4 overflow-hidden"
-            >
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} transition={{ duration: 0.3 }} className="mt-4 overflow-hidden">
               {insightsLoading ? (
                 <div className="p-8 bg-bg-elevated rounded-xl border border-border text-text-tertiary text-sm flex items-center gap-3">
-                  <Sparkles className="w-4 h-4 animate-pulse-soft" />
-                  Analyzing this film...
+                  <Sparkles className="w-4 h-4 animate-pulse-soft" /> Analyzing this film...
                 </div>
               ) : insights ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -391,9 +349,7 @@ export default function MovieDetailPage() {
                     <h3 className="text-xs font-mono text-accent uppercase tracking-wider mb-2">Perfect For</h3>
                     <div className="flex flex-wrap gap-2">
                       {insights.perfect_for?.map((s: string, i: number) => (
-                        <span key={i} className="px-3 py-1 text-xs rounded-md bg-bg-surface text-text-secondary border border-border">
-                          {s}
-                        </span>
+                        <span key={i} className="px-3 py-1 text-xs rounded-md bg-bg-surface text-text-secondary border border-border">{s}</span>
                       ))}
                     </div>
                   </div>
@@ -401,9 +357,7 @@ export default function MovieDetailPage() {
                     <h3 className="text-xs font-mono text-accent uppercase tracking-wider mb-2">Mood Tags</h3>
                     <div className="flex flex-wrap gap-2">
                       {insights.mood_tags?.map((tag: string, i: number) => (
-                        <span key={i} className="px-2.5 py-1 text-xs rounded-md bg-accent-muted text-accent border border-accent/20">
-                          {tag}
-                        </span>
+                        <span key={i} className="px-2.5 py-1 text-xs rounded-md bg-accent-muted text-accent border border-accent/20">{tag}</span>
                       ))}
                     </div>
                   </div>
@@ -420,15 +374,13 @@ export default function MovieDetailPage() {
                   </div>
                 </div>
               ) : (
-                <div className="p-8 bg-bg-elevated rounded-xl border border-border text-text-tertiary text-sm">
-                  Failed to load insights. Please try again.
-                </div>
+                <div className="p-8 bg-bg-elevated rounded-xl border border-border text-text-tertiary text-sm">Failed to load insights. Please try again.</div>
               )}
             </motion.div>
           )}
         </section>
 
-        {/* ===== SIMILAR ===== */}
+        {/* Similar */}
         {similar.length > 0 && (
           <section className="mt-16 mb-16">
             <Carousel title="Similar Films" subtitle="Movies you might also enjoy">

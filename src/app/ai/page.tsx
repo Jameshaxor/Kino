@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, ArrowRight, Loader2, MessageCircle, Star, Zap } from "lucide-react";
+import { Sparkles, ArrowRight, Loader2, MessageCircle, Star, Zap, History, X, CloudRain, Infinity, Home, Rocket, ShieldAlert, HeartPulse, Skull, Sun, Brain, Flame, Heart, Globe, Ghost, Palette } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { img } from "@/lib/tmdb";
@@ -25,19 +25,50 @@ interface AIResponse {
 }
 
 const SUGGESTED_PROMPTS = [
-  { text: "A rainy Sunday film that'll gently ruin me", emoji: "🌧️" },
-  { text: "Something like Inception but weirder", emoji: "🌀" },
-  { text: "A feel-good movie for the whole family", emoji: "🏡" },
-  { text: "Visually stunning sci-fi from the last decade", emoji: "🚀" },
-  { text: "An underrated thriller that keeps me guessing", emoji: "🔪" },
-  { text: "A foreign masterpiece I've never heard of", emoji: "🌍" },
+  { text: "A rainy Sunday film that'll gently ruin me", icon: CloudRain },
+  { text: "Something like Inception but weirder", icon: Infinity },
+  { text: "A feel-good movie for the whole family", icon: Home },
+  { text: "Visually stunning sci-fi from the last decade", icon: Rocket },
+  { text: "An underrated thriller that keeps me guessing", icon: ShieldAlert },
+  { text: "A foreign masterpiece I've never heard of", icon: Globe },
 ];
+
+const MOOD_TILES = [
+  { label: "Dark & Gritty", icon: Skull, color: "from-zinc-900 via-stone-900 to-black", border: "border-zinc-800", text: "text-zinc-400", prompt: "Dark, gritty, and morally complex films" },
+  { label: "Feel-Good", icon: Sun, color: "from-amber-900/30 via-orange-900/20 to-bg-elevated", border: "border-amber-700/30", text: "text-amber-400", prompt: "Uplifting, heartwarming, feel-good films" },
+  { label: "Mind-Bending", icon: Brain, color: "from-indigo-900/30 via-purple-900/20 to-bg-elevated", border: "border-indigo-700/30", text: "text-indigo-400", prompt: "Mind-bending, reality-twisting, cerebral films" },
+  { label: "Action-Packed", icon: Flame, color: "from-red-900/30 via-rose-900/20 to-bg-elevated", border: "border-red-700/30", text: "text-red-400", prompt: "High-octane action films with stunning set pieces" },
+  { label: "Romantic", icon: Heart, color: "from-pink-900/30 via-fuchsia-900/20 to-bg-elevated", border: "border-pink-700/30", text: "text-pink-400", prompt: "Romantic, emotional love stories" },
+  { label: "World Cinema", icon: Globe, color: "from-emerald-900/30 via-teal-900/20 to-bg-elevated", border: "border-emerald-700/30", text: "text-emerald-400", prompt: "Award-winning foreign language films and world cinema" },
+  { label: "Horror", icon: Ghost, color: "from-slate-900 via-gray-900 to-bg-elevated", border: "border-slate-700/50", text: "text-slate-400", prompt: "Terrifying and unsettling horror films" },
+  { label: "Animated", icon: Palette, color: "from-cyan-900/30 via-sky-900/20 to-bg-elevated", border: "border-cyan-700/30", text: "text-cyan-400", prompt: "Visually stunning animated films for all ages" },
+];
+
+const MAX_HISTORY = 5;
+
+function useQueryHistory() {
+  const getHistory = (): string[] => {
+    try { return JSON.parse(localStorage.getItem("kino-oracle-history") || "[]"); } catch { return []; }
+  };
+  const addToHistory = (q: string) => {
+    try {
+      const h = [q, ...getHistory().filter((x) => x !== q)].slice(0, MAX_HISTORY);
+      localStorage.setItem("kino-oracle-history", JSON.stringify(h));
+    } catch { /* ignore */ }
+  };
+  return { getHistory, addToHistory };
+}
 
 export default function AIOraclePage() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState<AIResponse | null>(null);
   const [error, setError] = useState("");
+  const [history, setHistory] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
+    try { return JSON.parse(localStorage.getItem("kino-oracle-history") || "[]"); } catch { return []; }
+  });
+  const { addToHistory } = useQueryHistory();
 
   const handleSubmit = async (input?: string) => {
     const q = input || query;
@@ -53,14 +84,14 @@ export default function AIOraclePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: q }),
       });
-
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error || "Failed to get recommendations");
       }
-
       const data = await res.json();
       setResponse(data);
+      addToHistory(q);
+      setHistory((prev) => [q, ...prev.filter((x) => x !== q)].slice(0, MAX_HISTORY));
     } catch (err: any) {
       setError(err.message || "Something went wrong. Try again.");
     } finally {
@@ -75,13 +106,9 @@ export default function AIOraclePage() {
         <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-accent/[0.03] rounded-full blur-[120px]" />
       </div>
 
-      <div className="max-w-3xl mx-auto w-full px-5 md:px-8 py-16 md:py-24 flex flex-col gap-12">
+      <div className="max-w-3xl mx-auto w-full px-5 md:px-8 py-12 md:py-20 flex flex-col gap-10">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col items-center text-center gap-5"
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center text-center gap-5">
           <div className="relative">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5 border border-accent/20 flex items-center justify-center animate-glow-pulse">
               <Sparkles className="w-7 h-7 text-accent" />
@@ -93,21 +120,37 @@ export default function AIOraclePage() {
               AI Movie <span className="text-gradient-gold">Oracle</span>
             </h1>
             <p className="text-text-secondary mt-3 text-base max-w-md mx-auto">
-              Describe a mood, a vibe, or a specific scenario — and let AI curate your perfect watchlist.
+              Describe a mood, pick a vibe tile, or type anything — and let AI curate your perfect watchlist.
             </p>
           </div>
         </motion.div>
 
+        {/* Mood Board */}
+        {!response && !loading && (
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="flex flex-col gap-4">
+            <span className="text-xs font-mono text-text-tertiary uppercase tracking-[0.15em] text-center">Pick a Vibe</span>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {MOOD_TILES.map((tile) => {
+                const Icon = tile.icon;
+                return (
+                  <button
+                    key={tile.label}
+                    onClick={() => { setQuery(tile.prompt); handleSubmit(tile.prompt); }}
+                    className={`group relative overflow-hidden rounded-xl p-4 bg-gradient-to-br ${tile.color} border ${tile.border} hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 text-left`}
+                  >
+                    <Icon className={`w-6 h-6 mb-3 ${tile.text} opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300`} />
+                    <div className="text-[13px] font-medium text-text-primary group-hover:text-white transition-colors">{tile.label}</div>
+                    <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors duration-300 rounded-xl" />
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+
         {/* Input */}
-        <motion.form
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}
-          className="w-full"
-        >
+        <motion.form initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="w-full">
           <div className="relative group">
-            {/* Glow border */}
             <div className="absolute -inset-[1px] rounded-2xl bg-gradient-to-r from-accent/0 via-accent/20 to-accent/0 opacity-0 group-focus-within:opacity-100 transition-opacity duration-500 blur-sm" />
             <div className="relative flex items-center bg-bg-elevated rounded-2xl border border-border group-focus-within:border-accent/30 transition-colors">
               <MessageCircle className="w-4 h-4 text-text-tertiary ml-5 flex-shrink-0" />
@@ -115,20 +158,20 @@ export default function AIOraclePage() {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Describe what you're in the mood for..."
+                placeholder="Or describe what you're in the mood for..."
                 className="flex-1 bg-transparent px-4 py-5 text-text-primary placeholder:text-text-tertiary focus:outline-none text-base"
                 disabled={loading}
+                maxLength={200}
               />
+              {query.length > 0 && (
+                <span className="text-[11px] font-mono text-text-tertiary mr-2 hidden sm:inline">{query.length}/200</span>
+              )}
               <button
                 type="submit"
                 disabled={loading || !query.trim()}
-                className="m-2 px-6 py-3 rounded-xl bg-white text-black font-semibold text-sm disabled:opacity-30 hover:bg-gray-100 transition-colors flex items-center gap-2"
+                className="flex-shrink-0 m-1.5 md:m-2 px-4 md:px-6 py-2.5 md:py-3 rounded-xl bg-accent text-white font-semibold text-sm disabled:opacity-30 hover:bg-accent-hover transition-colors flex items-center justify-center gap-2"
               >
-                {loading ? (
-                  <Loader2 className="w-4 h-4 text-black animate-spin" />
-                ) : (
-                  <>Ask <ArrowRight className="w-4 h-4 ml-1" /></>
-                )}
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Ask <ArrowRight className="w-4 h-4 ml-1" /></>}
               </button>
             </div>
           </div>
@@ -136,24 +179,41 @@ export default function AIOraclePage() {
 
         {/* Suggested prompts */}
         {!response && !loading && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="flex flex-col items-center gap-4"
-          >
-            <span className="text-xs font-mono text-text-tertiary uppercase tracking-[0.15em]">
-              Try One of These
-            </span>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="flex flex-col items-center gap-4">
+            <span className="text-xs font-mono text-text-tertiary uppercase tracking-[0.15em]">Or Try One of These</span>
             <div className="flex flex-wrap justify-center gap-2.5">
-              {SUGGESTED_PROMPTS.map((prompt) => (
+              {SUGGESTED_PROMPTS.map((prompt) => {
+                const Icon = prompt.icon;
+                return (
+                  <button
+                    key={prompt.text}
+                    onClick={() => { setQuery(prompt.text); handleSubmit(prompt.text); }}
+                    className="group px-4 py-2.5 text-xs text-text-secondary bg-bg-surface border border-border rounded-xl hover:border-accent/40 hover:text-text-primary hover:bg-bg-elevated transition-all flex items-center gap-2.5"
+                  >
+                    <Icon className="w-3.5 h-3.5 text-text-tertiary group-hover:text-accent transition-colors" />
+                    {prompt.text}
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Query History */}
+        {!response && !loading && history.length > 0 && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }} className="flex flex-col gap-3">
+            <div className="flex items-center gap-2">
+              <History className="w-3.5 h-3.5 text-text-tertiary" />
+              <span className="text-xs font-mono text-text-tertiary uppercase tracking-[0.15em]">Recent Queries</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {history.map((h) => (
                 <button
-                  key={prompt.text}
-                  onClick={() => { setQuery(prompt.text); handleSubmit(prompt.text); }}
-                  className="px-4 py-2.5 text-xs text-text-secondary bg-bg-elevated border border-border rounded-xl hover:border-accent/30 hover:text-text-primary hover:bg-accent-muted transition-all flex items-center gap-2"
+                  key={h}
+                  onClick={() => { setQuery(h); handleSubmit(h); }}
+                  className="px-3 py-1.5 text-xs text-text-tertiary bg-bg-surface border border-border/50 rounded-lg hover:border-accent/20 hover:text-text-secondary transition-all truncate max-w-[200px]"
                 >
-                  <span>{prompt.emoji}</span>
-                  {prompt.text}
+                  {h}
                 </button>
               ))}
             </div>
@@ -162,19 +222,14 @@ export default function AIOraclePage() {
 
         {/* Error */}
         {error && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            className="p-5 bg-error/10 border border-error/20 text-error rounded-xl text-center text-sm">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-5 bg-error/10 border border-error/20 text-error rounded-xl text-center text-sm">
             {error}
           </motion.div>
         )}
 
         {/* Loading */}
         {loading && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex flex-col items-center justify-center py-20 gap-4"
-          >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 gap-4">
             <div className="relative">
               <div className="w-14 h-14 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center">
                 <Sparkles className="w-6 h-6 text-accent animate-pulse-soft" />
@@ -191,81 +246,43 @@ export default function AIOraclePage() {
         {/* Results */}
         <AnimatePresence>
           {response && !loading && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="flex flex-col gap-8"
-            >
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="flex flex-col gap-8">
               {/* Taste note */}
               <div className="relative p-6 rounded-2xl bg-bg-elevated border border-accent/10 overflow-hidden">
                 <div className="absolute top-0 right-0 w-40 h-40 bg-accent/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
                 <div className="relative flex items-start gap-3">
                   <Sparkles className="w-4 h-4 text-accent mt-1 flex-shrink-0" />
-                  <p className="text-base font-display text-text-primary italic leading-relaxed">
-                    &ldquo;{response.taste_note}&rdquo;
-                  </p>
+                  <p className="text-base font-display text-text-primary italic leading-relaxed">&ldquo;{response.taste_note}&rdquo;</p>
                 </div>
               </div>
 
               {/* Recommendation cards */}
               <div className="flex flex-col gap-4">
-                <span className="text-xs font-mono text-text-tertiary uppercase tracking-[0.15em]">
-                  Your Curated Picks
-                </span>
+                <span className="text-xs font-mono text-text-tertiary uppercase tracking-[0.15em]">Your Curated Picks</span>
                 {response.recommendations.map((rec, i) => (
-                  <motion.div
-                    key={rec.id || i}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.12, duration: 0.4 }}
-                  >
-                    <Link
-                      href={rec.id ? `/movie/${rec.id}` : "#"}
-                      className="card-premium flex gap-5 p-5 group"
-                    >
-                      {/* Poster */}
+                  <motion.div key={rec.id || i} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.12, duration: 0.4 }}>
+                    <Link href={rec.id ? `/movie/${rec.id}` : "#"} className="card-premium flex gap-5 p-5 group">
                       <div className="w-[80px] md:w-[100px] aspect-[2/3] rounded-lg overflow-hidden bg-bg-surface flex-shrink-0 shadow-card">
                         {rec.poster_path ? (
-                          <Image
-                            src={img(rec.poster_path, "w200")}
-                            alt={rec.title}
-                            width={100}
-                            height={150}
-                            className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
-                          />
+                          <Image src={img(rec.poster_path, "w200")} alt={rec.title} width={100} height={150} className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105" />
                         ) : (
-                          <div className="flex h-full items-center justify-center text-text-tertiary text-xs italic p-2 text-center">
-                            {rec.title}
-                          </div>
+                          <div className="flex h-full items-center justify-center text-text-tertiary text-xs italic p-2 text-center">{rec.title}</div>
                         )}
                       </div>
-
-                      {/* Info */}
                       <div className="flex-1 flex flex-col gap-2.5 py-0.5">
                         <div className="flex items-start justify-between gap-3">
                           <div>
-                            <h3 className="font-display font-semibold text-lg text-text-primary group-hover:text-accent transition-colors leading-tight">
-                              {rec.title}
-                            </h3>
+                            <h3 className="font-display font-semibold text-lg text-text-primary group-hover:text-accent transition-colors leading-tight">{rec.title}</h3>
                             <span className="text-xs font-mono text-text-tertiary">{rec.year}</span>
                           </div>
                           <span className="px-3 py-1.5 text-xs font-mono font-bold text-rating-high bg-rating-high/10 border border-rating-high/20 rounded-lg flex-shrink-0 flex items-center gap-1">
-                            <Zap className="w-3 h-3" />
-                            {rec.vibe_match}%
+                            <Zap className="w-3 h-3" />{rec.vibe_match}%
                           </span>
                         </div>
-
-                        <p className="text-sm text-text-secondary leading-relaxed">
-                          {rec.pitch}
-                        </p>
-
+                        <p className="text-sm text-text-secondary leading-relaxed">{rec.pitch}</p>
                         <div className="flex flex-wrap gap-1.5 mt-auto">
                           {rec.mood_tags?.map((tag) => (
-                            <span key={tag}
-                              className="text-[11px] text-accent/80 bg-accent-muted px-2.5 py-1 rounded-md border border-accent/10">
-                              {tag}
-                            </span>
+                            <span key={tag} className="text-[11px] text-accent/80 bg-accent-muted px-2.5 py-1 rounded-md border border-accent/10">{tag}</span>
                           ))}
                         </div>
                       </div>
@@ -276,12 +293,8 @@ export default function AIOraclePage() {
 
               {/* Ask again */}
               <div className="flex justify-center pt-4">
-                <button
-                  onClick={() => { setResponse(null); setQuery(""); }}
-                  className="btn-ghost text-sm"
-                >
-                  <Sparkles className="w-4 h-4" />
-                  Ask Another Question
+                <button onClick={() => { setResponse(null); setQuery(""); }} className="btn-ghost text-sm">
+                  <X className="w-4 h-4" /> New Search
                 </button>
               </div>
             </motion.div>

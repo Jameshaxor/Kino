@@ -5,10 +5,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Play, Sparkles, ArrowRight, Shuffle, Star, TrendingUp, Clock, Award } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { img, GENRE_LIST } from "@/lib/tmdb";
+import { img, GENRE_LIST, GENRE_MAP } from "@/lib/tmdb";
 import MovieCard from "@/components/ui/MovieCard";
 import Carousel from "@/components/ui/Carousel";
 import { CarouselSkeleton } from "@/components/ui/Skeleton";
+import { useWatchlist } from "@/context/WatchlistContext";
 
 interface MovieData {
   id: number;
@@ -23,6 +24,7 @@ interface MovieData {
 }
 
 export default function HomePage() {
+  const { user, favorites } = useWatchlist();
   const [trending, setTrending] = useState<MovieData[]>([]);
   const [topRated, setTopRated] = useState<MovieData[]>([]);
   const [nowPlaying, setNowPlaying] = useState<MovieData[]>([]);
@@ -101,8 +103,8 @@ export default function HomePage() {
               <div className="absolute inset-0 bg-gradient-to-t from-bg-primary via-bg-primary/70 to-transparent" />
               <div className="absolute inset-0 bg-gradient-to-r from-bg-primary via-bg-primary/50 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-bg-primary to-transparent" />
-              {/* Subtle gold vignette */}
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(212,168,67,0.06)_0%,transparent_50%)]" />
+              {/* Subtle purple vignette */}
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(139,92,246,0.06)_0%,transparent_50%)]" />
             </motion.div>
           </AnimatePresence>
 
@@ -136,11 +138,26 @@ export default function HomePage() {
                   {hero.overview}
                 </p>
 
+                {/* Genre tags */}
+                {hero.genre_ids && hero.genre_ids.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {hero.genre_ids.slice(0, 3).map((id) => (
+                      <Link
+                        key={id}
+                        href={`/explore/genre/${id}`}
+                        className="px-2.5 py-1 text-xs font-medium rounded-md bg-white/5 text-text-secondary border border-white/10 hover:border-accent/30 hover:text-accent transition-colors backdrop-blur-sm"
+                      >
+                        {GENRE_MAP[id]}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+
                 {/* Meta row */}
                 <div className="flex items-center gap-5">
-                  {/* Rating ring */}
+                  {/* Rating ring — relative wrapper added for absolute span positioning */}
                   <div className="flex items-center gap-2.5">
-                    <div className="rating-ring">
+                    <div className="rating-ring relative">
                       <svg viewBox="0 0 36 36">
                         <circle className="bg-circle" cx="18" cy="18" r="15.9" />
                         <circle
@@ -283,6 +300,13 @@ export default function HomePage() {
             </Carousel>
           )}
         </section>
+
+        {/* ── Curated For You ── */}
+        {user && favorites.length >= 2 && !loading && (
+          <section className="px-5 md:px-8">
+            <CuratedForYouRow favorites={favorites} />
+          </section>
+        )}
 
         {/* ── Staff Picks / Top 5 ── */}
         {!loading && topRated.length > 0 && (
@@ -490,5 +514,51 @@ function SurpriseMe() {
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+function CuratedForYouRow({ favorites }: { favorites: any[] }) {
+  const [curated, setCurated] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!favorites || favorites.length === 0) return;
+    const fetchCurated = async () => {
+      setLoading(true);
+      try {
+        const samples = [...favorites].sort(() => 0.5 - Math.random()).slice(0, 3);
+        const fetches = samples.map(m => fetch(`/api/tmdb/movie/${m.id}/similar`).then(r => r.json()));
+        const results = await Promise.all(fetches);
+        
+        let pool: any[] = [];
+        results.forEach(res => {
+          if (res.results) pool = pool.concat(res.results.slice(0, 5));
+        });
+
+        const unique = Array.from(new Map(pool.map(m => [m.id, m])).values());
+        const filtered = unique.filter((m: any) => !favorites.some(f => f.id === m.id));
+        setCurated(filtered.slice(0, 10));
+      } catch {
+        // ignore
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCurated();
+  }, [favorites]);
+
+  if (loading) return <CarouselSkeleton />;
+  if (curated.length === 0) return null;
+
+  return (
+    <Carousel
+      title="Curated For You"
+      subtitle="Based on your favorites"
+      icon={<Sparkles className="w-5 h-5 text-accent" />}
+    >
+      {curated.map((movie, i) => (
+        <MovieCard key={`curated-${movie.id}`} movie={movie} index={i} />
+      ))}
+    </Carousel>
   );
 }

@@ -5,14 +5,15 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import MobileBottomNav from "./MobileBottomNav";
 import CommandPalette from "./CommandPalette";
 import ScrollToTop from "@/components/ui/ScrollToTop";
 import AuthGreeting from "@/components/ui/AuthGreeting";
 import { WatchlistProvider } from "@/context/WatchlistContext";
+import { RegionProvider } from "@/context/RegionContext";
 
 function PageTransition({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-
   return (
     <AnimatePresence mode="wait">
       <motion.div
@@ -30,7 +31,6 @@ function PageTransition({ children }: { children: React.ReactNode }) {
 
 export default function ClientShell({ children }: { children: React.ReactNode }) {
   const [searchOpen, setSearchOpen] = useState(false);
-
   const openSearch = useCallback(() => setSearchOpen(true), []);
   const closeSearch = useCallback(() => setSearchOpen(false), []);
 
@@ -45,15 +45,19 @@ export default function ClientShell({ children }: { children: React.ReactNode })
   }, []);
 
   return (
-    <WatchlistProvider>
-      <Navbar onOpenSearch={openSearch} />
-      <main className="flex-grow w-full pt-16">
-        <PageTransition>{children}</PageTransition>
-      </main>
-      <Footer />
-      <ScrollToTop />
-      <AuthGreeting />
-      <CommandPalette isOpen={searchOpen} onClose={closeSearch} />
-    </WatchlistProvider>
+    <RegionProvider>
+      <WatchlistProvider>
+        <Navbar onOpenSearch={openSearch} />
+        {/* pb-24 md:pb-0 gives breathing room for the mobile bottom nav */}
+        <main className="flex-grow w-full pt-16 pb-24 md:pb-0">
+          <PageTransition>{children}</PageTransition>
+        </main>
+        <Footer />
+        <MobileBottomNav />
+        <ScrollToTop />
+        <AuthGreeting />
+        <CommandPalette isOpen={searchOpen} onClose={closeSearch} />
+      </WatchlistProvider>
+    </RegionProvider>
   );
 }
