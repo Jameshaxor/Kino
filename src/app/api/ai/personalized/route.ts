@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getPersonalizedRecommendations } from "@/lib/gemini";
 
+export const runtime = "edge";
+
 export async function POST(req: Request) {
   try {
     const { favorites } = await req.json();

@@ -19,7 +19,10 @@ export const getMovieRecommendations = async (query: string): Promise<AIResponse
   if (!API_KEY) throw new Error("GEMINI_API_KEY is not configured");
 
   const genAI = new GoogleGenerativeAI(API_KEY);
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+  const model = genAI.getGenerativeModel({ 
+    model: "gemini-1.5-flash",
+    generationConfig: { responseMimeType: "application/json" }
+  });
 
   const prompt = `You are a world-class film curator with encyclopedic knowledge of cinema across all eras and cultures. A user is looking for movie recommendations based on this request:
 
@@ -57,7 +60,10 @@ export const getMovieInsights = async (movieTitle: string, movieOverview: string
   if (!API_KEY) throw new Error("GEMINI_API_KEY is not configured");
 
   const genAI = new GoogleGenerativeAI(API_KEY);
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+  const model = genAI.getGenerativeModel({ 
+    model: "gemini-1.5-flash",
+    generationConfig: { responseMimeType: "application/json" }
+  });
 
   const prompt = `You are a brilliant film critic. Given this movie:
 
@@ -90,7 +96,10 @@ export const getPersonalizedRecommendations = async (titleList: string) => {
   if (!API_KEY) throw new Error("GEMINI_API_KEY is not configured");
 
   const genAI = new GoogleGenerativeAI(API_KEY);
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+  const model = genAI.getGenerativeModel({ 
+    model: "gemini-1.5-flash",
+    generationConfig: { responseMimeType: "application/json" }
+  });
 
   const prompt = `You are a world-class film and TV curator. A user's favorite titles are: ${titleList}
 

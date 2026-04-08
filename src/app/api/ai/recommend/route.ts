@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getMovieRecommendations } from "@/lib/gemini";
 import { fetchTMDB } from "@/lib/tmdb";
 
+export const runtime = "edge";
+
 export async function POST(req: NextRequest) {
   try {
     const { query } = await req.json();
@@ -19,7 +21,7 @@ export async function POST(req: NextRequest) {
           const searchRes = await fetchTMDB("/search/movie", {
             query: rec.title,
             primary_release_year: rec.year?.toString() || "",
-          }, { revalidate: 0 });
+          });
 
           const match = searchRes?.results?.[0];
           if (match) {
