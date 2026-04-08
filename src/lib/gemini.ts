@@ -48,8 +48,7 @@ Respond ONLY with valid JSON (no markdown, no backticks, no extra text):
   const text = result.response.text();
 
   try {
-    const cleaned = text.replace(/```json\s*/i, "").replace(/```\s*/g, "").trim();
-    return JSON.parse(cleaned);
+    return JSON.parse(text);
   } catch {
     console.error("Failed to parse Gemini response:", text);
     throw new Error("AI returned an invalid response. Try again.");
@@ -84,8 +83,7 @@ Generate insights. Respond ONLY with valid JSON (no markdown, no backticks):
   const text = result.response.text();
 
   try {
-    const cleaned = text.replace(/```json\s*/i, "").replace(/```\s*/g, "").trim();
-    return JSON.parse(cleaned);
+    return JSON.parse(text);
   } catch {
     console.error("Failed to parse Gemini insights response:", text);
     throw new Error("AI returned an invalid response");
@@ -127,8 +125,7 @@ Respond ONLY with valid JSON (no markdown, no backticks, no extra text):
   const text = result.response.text();
 
   try {
-    const cleaned = text.replace(/```json\s*/i, "").replace(/```\s*/g, "").trim();
-    return JSON.parse(cleaned);
+    return JSON.parse(text);
   } catch (error: any) {
     console.error("Failed to parse personalized response:", text);
     console.error("Parse error:", error.message || error);

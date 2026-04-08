@@ -3,8 +3,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, X, Film, Tv, ArrowRight, Loader2 } from "lucide-react";
+import { Search, X, Film, Tv, ArrowRight, Loader2, Sparkles, TrendingUp, Compass, Bookmark } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { img } from "@/lib/tmdb";
 import { useDebounce } from "@/hooks/useDebounce";
 
@@ -30,6 +31,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
   const [loading, setLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const selectedRef = useRef<HTMLButtonElement>(null);
   const router = useRouter();
   const debouncedQuery = useDebounce(query, 300);
 
@@ -97,6 +99,11 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     return () => window.removeEventListener("keydown", handleKey);
   }, [isOpen, onClose, results, selectedIndex, navigateTo]);
 
+  // Scroll selected result into view on keyboard navigation
+  useEffect(() => {
+    selectedRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [selectedIndex]);
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -147,14 +154,15 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                       
                       return (
                         <button
+                          ref={i === selectedIndex ? selectedRef : null}
                           key={`${result.media_type}-${result.id}`}
                           onClick={() => navigateTo(`/${result.media_type}/${result.id}`)}
                           onMouseEnter={() => setSelectedIndex(i)}
-                          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
+                          className={`group w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
                             i === selectedIndex ? "bg-bg-surface" : "hover:bg-bg-surface/50"
                           }`}
                         >
-                          <div className="w-9 h-13 rounded overflow-hidden bg-bg-surface flex-shrink-0 relative">
+                          <div className="w-9 aspect-[2/3] rounded overflow-hidden bg-bg-surface flex-shrink-0 relative">
                             {result.poster_path ? (
                               <Image
                                 src={img(result.poster_path, "w92")}
@@ -175,7 +183,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
                               <p className="text-sm font-medium text-text-primary truncate">{title}</p>
-                              <span className="px-1.5 py-0.5 rounded bg-bg-base/50 border border-border text-[9px] uppercase tracking-wider text-text-secondary">
+                              <span className="px-1.5 py-0.5 rounded bg-bg-surface border border-border text-[9px] uppercase tracking-wider text-text-tertiary shrink-0">
                                 {result.media_type}
                               </span>
                             </div>
@@ -184,19 +192,53 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                               {result.vote_average > 0 && ` · ${result.vote_average.toFixed(1)}★`}
                             </p>
                           </div>
-                          <ArrowRight className="w-3.5 h-3.5 text-text-tertiary opacity-0 group-hover:opacity-100" />
+                          <ArrowRight className="w-3.5 h-3.5 text-text-tertiary opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
                         </button>
                       );
                     })}
                   </div>
                 ) : query && !loading ? (
-                  <div className="p-8 text-center text-text-tertiary text-sm">
-                    No results found for &ldquo;{query}&rdquo;
+                  <div className="p-8 text-center">
+                    <p className="text-text-tertiary text-sm">No results found for &ldquo;{query}&rdquo;</p>
+                    <Link
+                      href={`/search?q=${encodeURIComponent(query)}`}
+                      onClick={onClose}
+                      className="mt-3 inline-flex items-center gap-1.5 text-xs text-accent hover:text-accent-hover transition-colors"
+                    >
+                      Search full catalog <ArrowRight className="w-3 h-3" />
+                    </Link>
                   </div>
                 ) : !query ? (
-                  <div className="p-6 text-center text-text-tertiary text-sm">
-                    <p>Search the entire KINO catalog</p>
-                    <div className="flex items-center justify-center gap-4 mt-3 text-xs">
+                  <div className="p-4">
+                    <p className="text-[10px] font-mono text-text-tertiary uppercase tracking-[0.15em] px-2 mb-2">Quick Navigation</p>
+                    <div className="flex flex-col gap-0.5">
+                      {[
+                        { href: "/", label: "Discover", icon: TrendingUp, desc: "Home feed & trending" },
+                        { href: "/browse", label: "Browse Catalog", icon: Compass, desc: "Full movie & TV library" },
+                        { href: "/ai", label: "AI Oracle", icon: Sparkles, desc: "Gemini-powered picks" },
+                        { href: "/library", label: "My Library", icon: Bookmark, desc: "Watchlist & favorites" },
+                      ].map((item) => {
+                        const Icon = item.icon;
+                        return (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            onClick={onClose}
+                            className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-bg-surface transition-colors group"
+                          >
+                            <div className="w-7 h-7 rounded-md bg-accent/10 border border-accent/20 flex items-center justify-center shrink-0">
+                              <Icon className="w-3.5 h-3.5 text-accent" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-text-primary">{item.label}</p>
+                              <p className="text-[11px] text-text-tertiary">{item.desc}</p>
+                            </div>
+                            <ArrowRight className="w-3.5 h-3.5 text-text-tertiary opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </Link>
+                        );
+                      })}
+                    </div>
+                    <div className="flex items-center justify-center gap-4 mt-4 pt-3 border-t border-white/5 text-xs text-text-tertiary">
                       <span className="flex items-center gap-1">
                         <kbd className="px-1.5 py-0.5 rounded bg-bg-surface border border-border font-mono">↑↓</kbd>
                         navigate
@@ -215,8 +257,15 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
               </div>
 
               {results.length > 0 && (
-                <div className="px-4 py-2.5 border-t border-border flex justify-between text-xs text-text-tertiary">
+                <div className="px-4 py-2.5 border-t border-border flex justify-between items-center text-xs text-text-tertiary">
                   <span>{results.length} results</span>
+                  <Link
+                    href={`/search?q=${encodeURIComponent(query)}`}
+                    onClick={onClose}
+                    className="flex items-center gap-1 text-accent hover:text-accent-hover transition-colors font-medium"
+                  >
+                    View all <ArrowRight className="w-3 h-3" />
+                  </Link>
                 </div>
               )}
             </div>

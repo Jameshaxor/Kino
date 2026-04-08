@@ -2,7 +2,8 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Search as SearchIcon, Film, Tv, User } from "lucide-react";
+import { Search as SearchIcon, Film, Tv, User, ArrowRight, Sparkles } from "lucide-react";
+import Link from "next/link";
 import MovieCard from "@/components/ui/MovieCard";
 import { useDebounce } from "@/hooks/useDebounce";
 
@@ -16,7 +17,7 @@ const TYPE_TABS: { label: string; value: MediaType; icon: React.ElementType; end
 
 function PersonCard({ person }: { person: any }) {
   return (
-    <a
+    <Link
       href={`/person/${person.id}`}
       className="group card-premium p-4 flex gap-4 items-center"
     >
@@ -29,7 +30,9 @@ function PersonCard({ person }: { person: any }) {
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
-          <div className="flex items-center justify-center h-full text-text-tertiary text-xl">🎬</div>
+          <div className="flex items-center justify-center h-full text-text-tertiary">
+            <User className="w-6 h-6" />
+          </div>
         )}
       </div>
       <div className="min-w-0">
@@ -41,7 +44,7 @@ function PersonCard({ person }: { person: any }) {
           </p>
         )}
       </div>
-    </a>
+    </Link>
   );
 }
 
@@ -144,15 +147,33 @@ function SearchContent() {
             </div>
           )
         ) : query ? (
-          <div className="text-center py-20 text-text-tertiary">
-            <p className="text-lg font-display">No {activeType === "person" ? "people" : activeType === "tv" ? "TV shows" : "movies"} found</p>
-            <p className="text-sm mt-2">Try a different search term or switch tabs</p>
+          <div className="flex flex-col items-center py-20 gap-4 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-bg-elevated border border-border flex items-center justify-center">
+              <SearchIcon className="w-6 h-6 text-text-tertiary" />
+            </div>
+            <div>
+              <p className="text-lg font-display text-text-primary">No {activeType === "person" ? "people" : activeType === "tv" ? "TV shows" : "movies"} found</p>
+              <p className="text-sm text-text-tertiary mt-1">Try a different term or explore our catalog</p>
+            </div>
+            <div className="flex items-center gap-3 mt-2">
+              <Link href="/browse" className="btn-ghost text-sm px-5 py-2.5">
+                Browse Catalog
+              </Link>
+              <Link href="/ai" className="btn-gold text-sm px-5 py-2.5 flex items-center gap-2">
+                <Sparkles className="w-4 h-4" /> Ask AI Oracle
+              </Link>
+            </div>
           </div>
         ) : (
           <div className="text-center py-20 text-text-tertiary">
             <SearchIcon className="w-8 h-8 mx-auto mb-4 opacity-30" />
-            <p className="font-display text-lg">Start typing to search</p>
+            <p className="font-display text-lg text-text-primary">Search the KINO catalog</p>
             <p className="text-sm mt-1">Find any movie, TV show, or person</p>
+            <div className="flex items-center justify-center gap-3 mt-6">
+              <Link href="/browse" className="flex items-center gap-1.5 text-sm text-accent hover:text-accent-hover transition-colors">
+                Browse all <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
           </div>
         )}
       </div>

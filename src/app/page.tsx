@@ -31,6 +31,7 @@ export default function HomePage() {
   const [upcoming, setUpcoming] = useState<MovieData[]>([]);
   const [loading, setLoading] = useState(true);
   const [heroIndex, setHeroIndex] = useState(0);
+  const [heroPaused, setHeroPaused] = useState(false);
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -64,11 +65,12 @@ export default function HomePage() {
 
   useEffect(() => {
     if (trending.length < 2) return;
+    if (heroPaused) return;
     const interval = setInterval(() => {
       setHeroIndex((prev) => (prev + 1) % Math.min(trending.length, 5));
     }, 7000);
     return () => clearInterval(interval);
-  }, [trending]);
+  }, [trending, heroPaused]);
 
   const hero = trending[heroIndex];
 
@@ -76,7 +78,11 @@ export default function HomePage() {
     <div className="flex flex-col">
       {/* ═══════════ CINEMATIC HERO ═══════════ */}
       {hero ? (
-        <section className="relative w-full h-[75vh] md:h-[92vh] min-h-[500px] md:min-h-[650px] flex items-end overflow-hidden">
+        <section
+          className="relative w-full h-[75vh] md:h-[92vh] min-h-[500px] md:min-h-[650px] flex items-end overflow-hidden"
+          onMouseEnter={() => setHeroPaused(true)}
+          onMouseLeave={() => setHeroPaused(false)}
+        >
           {/* Ken Burns animated backdrop */}
           <AnimatePresence mode="wait">
             <motion.div
