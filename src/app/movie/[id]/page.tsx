@@ -38,7 +38,7 @@ export default function MovieDetailPage() {
           fetch(`/api/tmdb/movie/${movieId}`),
           fetch(`/api/tmdb/movie/${movieId}/credits`),
           fetch(`/api/tmdb/movie/${movieId}/videos`),
-          fetch(`/api/tmdb/movie/${movieId}/similar`),
+          fetch(`/api/tmdb/movie/${movieId}/recommendations`),
           fetch(`/api/tmdb/movie/${movieId}/watch/providers`),
         ]);
 

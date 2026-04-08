@@ -37,7 +37,7 @@ export default function TVDetailPage({ params }: { params: Promise<{ id: string 
           fetch(`/api/tmdb/tv/${tvId}`),
           fetch(`/api/tmdb/tv/${tvId}/credits`),
           fetch(`/api/tmdb/tv/${tvId}/videos`),
-          fetch(`/api/tmdb/tv/${tvId}/similar`),
+          fetch(`/api/tmdb/tv/${tvId}/recommendations`),
           fetch(`/api/tmdb/tv/${tvId}/watch/providers`),
         ]);
 
