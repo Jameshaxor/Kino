@@ -241,6 +241,7 @@ export default function HomePage() {
                   alt={hero.title}
                   fill
                   className="object-cover"
+                  priority={true}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
               </div>

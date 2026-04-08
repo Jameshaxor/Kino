@@ -48,7 +48,7 @@ export default function MovieCard({ movie, index = 0, size = "default" }: MovieC
       style={{ WebkitTouchCallout: 'none' }}
     >
       <Link href={targetRoute} className="block outline-none" prefetch={false}>
-        <div className="relative overflow-hidden rounded-xl bg-bg-elevated shadow-card transition-all duration-500 group-hover:shadow-card-hover md:group-hover:-translate-y-2 aspect-[2/3]">
+        <div className="relative overflow-hidden rounded-xl bg-bg-elevated shadow-card transition-all duration-500 group-hover:shadow-card-hover md:group-hover:-translate-y-2 aspect-[2/3] will-change-transform">
           {/* Gradient border on hover */}
           <div className="absolute inset-0 rounded-xl border border-border/50 group-hover:border-accent/20 transition-colors duration-500 z-30 pointer-events-none" />
 
@@ -72,8 +72,8 @@ export default function MovieCard({ movie, index = 0, size = "default" }: MovieC
           )}
 
           {/* Hover overlay with actions */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-0 md:group-hover:opacity-100 transition-all duration-300 z-10 flex flex-col justify-end p-3.5 mobile-no-blur">
-            <div className="flex gap-2 transform translate-y-3 md:group-hover:translate-y-0 transition-transform duration-300 delay-75">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-0 md:group-hover:opacity-100 transition-all duration-300 z-10 flex flex-col justify-end p-3.5 mobile-no-blur will-change-[opacity]">
+            <div className="flex gap-2 transform translate-y-3 md:group-hover:translate-y-0 transition-transform duration-300 delay-75 will-change-transform">
               <button
                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWatchlist(movie as any); }}
                 className={`p-2 rounded-lg backdrop-blur-md transition-all ${

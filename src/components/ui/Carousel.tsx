@@ -58,7 +58,8 @@ export default function Carousel({ title, subtitle, icon, children }: CarouselPr
       <div className="relative">
         <div
           ref={scrollRef}
-          className="flex gap-4 md:gap-5 overflow-x-auto hide-scrollbar px-6 md:px-0 pb-4 scroll-smooth snap-x snap-mandatory"
+          className="flex gap-4 md:gap-5 overflow-x-auto hide-scrollbar px-6 md:px-0 pb-4 scroll-smooth snap-x snap-mandatory overscroll-x-contain"
+          style={{ WebkitOverflowScrolling: "touch" }}
         >
           {children}
         </div>
