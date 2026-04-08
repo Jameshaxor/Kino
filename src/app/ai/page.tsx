@@ -238,7 +238,7 @@ export default function AIOraclePage() {
             </div>
             <div className="text-center">
               <p className="text-sm font-display text-text-primary">Curating your picks...</p>
-              <p className="text-xs text-text-tertiary mt-1">This usually takes 3–5 seconds</p>
+              <p className="text-[11px] text-text-tertiary mt-1.5 font-mono">Consulting the cinematic oracle...</p>
             </div>
           </motion.div>
         )}
